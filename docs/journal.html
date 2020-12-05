@@ -11,9 +11,9 @@
 
 <meta name="author" content="Aashik Udupi" />
 
-<meta name="date" content="2020-11-05" />
+<meta name="date" content="2020-12-05" />
 
-<title>Journal (reproducible report)</title>
+<title>Journal (Business Data Science Basics)</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -403,41 +403,415 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Journal (reproducible report)</h1>
+<h1 class="title toc-ignore">Journal (Business Data Science Basics)</h1>
 <h4 class="author">Aashik Udupi</h4>
-<h4 class="date">2020-11-05</h4>
+<h4 class="date">2020-12-05</h4>
 
 </div>
 
 
-<p><strong>IMPORTANT:</strong> You can delete everything in here and start fresh. You might want to start by not deleting anything above this line until you know what that stuff is doing.</p>
-<p>This is an <code>.Rmd</code> file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header.</p>
-<div id="my-first-post" class="section level1">
-<h1><span class="header-section-number">1</span> My first post</h1>
-<p>Last compiled: 2020-11-28</p>
-<p>Notice that whatever you define as a top level header, automatically gets put into the table of contents bar on the left.</p>
-<div id="second-level-header" class="section level2">
-<h2><span class="header-section-number">1.1</span> Second level header</h2>
-<p>You can add more headers by adding more hashtags. These won’t be put into the table of contents</p>
-<div id="third-level-header" class="section level3">
-<h3><span class="header-section-number">1.1.1</span> third level header</h3>
-<p>Here’s an even lower level header</p>
+<div id="sales-analysis" class="section level1">
+<h1><span class="header-section-number">1</span> Sales Analysis</h1>
+<div id="importing-all-required-libraries" class="section level2">
+<h2><span class="header-section-number">1.1</span> Importing all required libraries</h2>
+</div>
+<div id="importing-files" class="section level2">
+<h2><span class="header-section-number">1.2</span> Importing Files</h2>
+<pre class="r"><code>bikeshops_tbl  &lt;- read_excel(path = &quot;C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/01_raw_data/bikeshops.xlsx&quot;)
+bikes_tbl      &lt;- read_excel(path = &quot;C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/01_raw_data/bikes.xlsx&quot;)
+orderlines_tbl &lt;- read_excel(path = &quot;C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/01_raw_data/orderlines.xlsx&quot;)</code></pre>
+</div>
+<div id="examining-data" class="section level2">
+<h2><span class="header-section-number">1.3</span> Examining Data</h2>
+<pre class="r"><code>bikeshops_tbl</code></pre>
+<pre><code>## # A tibble: 30 x 5
+##    bikeshop.id name                  location                          lat   lng
+##          &lt;dbl&gt; &lt;chr&gt;                 &lt;chr&gt;                           &lt;dbl&gt; &lt;dbl&gt;
+##  1           1 Zum Goldenen Lenker   Berlin, Berlin                   52.5 13.4 
+##  2           2 AlexandeRad           Hamburg, Hamburg                 53.6 10.0 
+##  3           3 Fahrradladen 16       Munich, Bavaria                  48.2 11.6 
+##  4           4 Bikestation Köln      Cologne, North Rhine-Westphalia  50.9  6.95
+##  5           5 Montimare             Frankfurt, Hesse                 50.1  8.68
+##  6           6 fahrschneller         Stuttgart, Baden-Württemberg     48.8  9.18
+##  7           7 Rad Ab                Düsseldorf, North Rhine-Westph~  51.2  6.79
+##  8           8 Lucky Bike            Dortmund, North Rhine-Westphal~  51.5  7.47
+##  9           9 Zweirad-Center Stadl~ Essen, North Rhine-Westphalia    51.5  7.01
+## 10          10 WITT-RAD              Bremen, Bremen                   53.1  8.83
+## # ... with 20 more rows</code></pre>
+<pre class="r"><code>bikes_tbl</code></pre>
+<pre><code>## # A tibble: 231 x 9
+##    bike.id model  model.year frame.material weight price category gender url    
+##      &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;  
+##  1    2875 Aeroa~       2020 carbon           7.6   4579 Road - ~ unisex https:~
+##  2    2873 Aeroa~       2020 carbon           7.27  6919 Road - ~ unisex https:~
+##  3    2874 Aeroa~       2020 carbon           7.1   6429 Road - ~ unisex https:~
+##  4    2876 Aeroa~       2020 carbon           7.73  5069 Road - ~ unisex https:~
+##  5    2877 Aeroa~       2020 carbon           7.83  3609 Road - ~ unisex https:~
+##  6    2225 Aeroa~       2019 carbon           6.8   6139 Road - ~ unisex https:~
+##  7    2091 Aeroa~       2019 carbon           6.8   5359 Road - ~ unisex https:~
+##  8    2086 Aeroa~       2021 carbon           7.6   2629 Road - ~ unisex https:~
+##  9    2088 Aeroa~       2020 carbon           7.3   3699 Road - ~ unisex https:~
+## 10    2120 Aeroa~       2020 carbon           7.2   3219 Road - ~ female https:~
+## # ... with 221 more rows</code></pre>
+<pre class="r"><code>orderlines_tbl</code></pre>
+<pre><code>## # A tibble: 15,644 x 7
+##    ...1  order.id order.line order.date          customer.id product.id quantity
+##    &lt;chr&gt;    &lt;dbl&gt;      &lt;dbl&gt; &lt;dttm&gt;                    &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+##  1 1            1          1 2015-01-07 00:00:00           2       2681        1
+##  2 2            1          2 2015-01-07 00:00:00           2       2411        1
+##  3 3            2          1 2015-01-10 00:00:00          10       2629        1
+##  4 4            2          2 2015-01-10 00:00:00          10       2137        1
+##  5 5            3          1 2015-01-10 00:00:00           6       2367        1
+##  6 6            3          2 2015-01-10 00:00:00           6       1973        1
+##  7 7            3          3 2015-01-10 00:00:00           6       2422        1
+##  8 8            3          4 2015-01-10 00:00:00           6       2655        1
+##  9 9            3          5 2015-01-10 00:00:00           6       2247        1
+## 10 10           4          1 2015-01-11 00:00:00          22       2408        1
+## # ... with 15,634 more rows</code></pre>
+</div>
+<div id="split-location-city-state" class="section level2">
+<h2><span class="header-section-number">1.4</span> Split Location : City, State</h2>
+<pre class="r"><code>bike_shops_wrangled_tbl &lt;- bikeshops_tbl %&gt;%
+  separate(col    = location,
+           into   = c(&quot;city&quot;, &quot;state&quot;),
+           sep    = &quot;,&quot;) 
+bike_shops_wrangled_tbl</code></pre>
+<pre><code>## # A tibble: 30 x 6
+##    bikeshop.id name                 city      state                    lat   lng
+##          &lt;dbl&gt; &lt;chr&gt;                &lt;chr&gt;     &lt;chr&gt;                  &lt;dbl&gt; &lt;dbl&gt;
+##  1           1 Zum Goldenen Lenker  Berlin    &quot; Berlin&quot;               52.5 13.4 
+##  2           2 AlexandeRad          Hamburg   &quot; Hamburg&quot;              53.6 10.0 
+##  3           3 Fahrradladen 16      Munich    &quot; Bavaria&quot;              48.2 11.6 
+##  4           4 Bikestation Köln     Cologne   &quot; North Rhine-Westpha~  50.9  6.95
+##  5           5 Montimare            Frankfurt &quot; Hesse&quot;                50.1  8.68
+##  6           6 fahrschneller        Stuttgart &quot; Baden-Württemberg&quot;    48.8  9.18
+##  7           7 Rad Ab               Düsseldo~ &quot; North Rhine-Westpha~  51.2  6.79
+##  8           8 Lucky Bike           Dortmund  &quot; North Rhine-Westpha~  51.5  7.47
+##  9           9 Zweirad-Center Stad~ Essen     &quot; North Rhine-Westpha~  51.5  7.01
+## 10          10 WITT-RAD             Bremen    &quot; Bremen&quot;               53.1  8.83
+## # ... with 20 more rows</code></pre>
+</div>
+<div id="simplify-the-data" class="section level2">
+<h2><span class="header-section-number">1.5</span> Simplify the data</h2>
+<pre class="r"><code>bikes_simplified_tbl &lt;- bikes_tbl %&gt;%
+  select(bike.id, model, price)
+
+orderlines_simplified_tbl &lt;- orderlines_tbl %&gt;%
+  select(...1, order.id, order.line, customer.id, product.id, quantity)
+
+bikeshops_simplified_tbl &lt;- bike_shops_wrangled_tbl %&gt;% 
+  select(bikeshop.id, city, state)
+bikes_orderlines_tbl &lt;- left_join(orderlines_simplified_tbl, bikes_simplified_tbl, by = c( &quot;product.id&quot; = &quot;bike.id&quot;))
+
+bikes_summary_tbl &lt;- left_join(bikes_orderlines_tbl, bikeshops_simplified_tbl, by = c( &quot;customer.id&quot; = &quot;bikeshop.id&quot;))
+bikes_summary_tbl</code></pre>
+<pre><code>## # A tibble: 15,644 x 10
+##    ...1  order.id order.line customer.id product.id quantity model price city 
+##    &lt;chr&gt;    &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+##  1 1            1          1           2       2681        1 Spec~  3119 Hamb~
+##  2 2            1          2           2       2411        1 Ulti~  5359 Hamb~
+##  3 3            2          1          10       2629        1 Neur~  2729 Brem~
+##  4 4            2          2          10       2137        1 Spee~  1749 Brem~
+##  5 5            3          1           6       2367        1 Stit~  1219 Stut~
+##  6 6            3          2           6       1973        1 Road~  1359 Stut~
+##  7 7            3          3           6       2422        1 Spee~  2529 Stut~
+##  8 8            3          4           6       2655        1 Infl~  1559 Stut~
+##  9 9            3          5           6       2247        1 Torq~  3899 Stut~
+## 10 10           4          1          22       2408        1 Ulti~  6629 Augs~
+## # ... with 15,634 more rows, and 1 more variable: state &lt;chr&gt;</code></pre>
+</div>
+<div id="sales-by-state" class="section level2">
+<h2><span class="header-section-number">1.6</span> Sales by State</h2>
+<pre class="r"><code>sales_by_loc_tbl &lt;- bikes_summary_tbl %&gt;%
+  select(state, price) %&gt;%
+  group_by(state) %&gt;%
+  summarize(sales = sum(price)) %&gt;%
+  mutate(Total_sales_in_Euro = scales::dollar(sales, big.mark = &quot;.&quot;, 
+                                              decimal.mark = &quot;,&quot;, 
+                                              prefix = &quot;&quot;, 
+                                              suffix = &quot; €&quot;))
+sales_by_loc_tbl</code></pre>
+<pre><code>## # A tibble: 12 x 3
+##    state                               sales Total_sales_in_Euro
+##    &lt;chr&gt;                               &lt;dbl&gt; &lt;chr&gt;              
+##  1 &quot; Baden-Württemberg&quot;              5128666 5.128.666 €        
+##  2 &quot; Bavaria&quot;                        5089951 5.089.951 €        
+##  3 &quot; Berlin&quot;                          847682 847.682 €          
+##  4 &quot; Bremen&quot;                         8488909 8.488.909 €        
+##  5 &quot; Hamburg&quot;                        2991365 2.991.365 €        
+##  6 &quot; Hesse&quot;                          1242444 1.242.444 €        
+##  7 &quot; Lower Saxony&quot;                   3245191 3.245.191 €        
+##  8 &quot; Mecklenburg-Western Pomerania&quot;   461118 461.118 €          
+##  9 &quot; North Rhine-Westphalia&quot;        16498928 16.498.928 €       
+## 10 &quot; Saxony&quot;                         1707805 1.707.805 €        
+## 11 &quot; Saxony-Anhalt&quot;                   465855 465.855 €          
+## 12 &quot; Schleswig-Holstein&quot;             2497572 2.497.572 €</code></pre>
+</div>
+<div id="bar-graph-plot" class="section level2">
+<h2><span class="header-section-number">1.7</span> Bar Graph Plot</h2>
+<pre class="r"><code>sales_by_loc_tbl %&gt;%
+  ggplot(aes(x = state, y = sales)) +
+  
+  geom_col(fill = &quot;#2DC6D6&quot;) + # Use geom_col for a bar plot
+  geom_label(aes(label = Total_sales_in_Euro)) + # Adding labels to the bars
+  geom_smooth(method = &quot;lm&quot;, se = FALSE) + # Adding a trendline
+  
+  scale_y_continuous(labels = scales::dollar_format(big.mark = &quot;.&quot;, 
+                                                    decimal.mark = &quot;,&quot;, 
+                                                    prefix = &quot;&quot;, 
+                                                    suffix = &quot; €&quot;)) +
+  labs(
+    title = &quot;Revenue by State&quot;,
+    x = &quot;State&quot;, 
+    y = &quot;Revenue&quot;
+  )</code></pre>
+<p><img src="journal_files/figure-html/unnamed-chunk-7-1.png" width="672" /> ## Writing Files</p>
+<pre class="r"><code>### Exporting to excel file
+sales_by_loc_tbl %&gt;%
+  write_xlsx(&quot;C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/02_wrangled_data/sales_by_loc_tbl.xlsx&quot;)
+### Exporting to csv file
+sales_by_loc_tbl %&gt;% 
+  write_csv(&quot;C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/02_wrangled_data/sales_by_loc_tbl.csv&quot;)
+### Exporting to rds file
+sales_by_loc_tbl %&gt;% 
+  write_rds(&quot;C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/02_wrangled_data/sales_by_loc_tbl.rds&quot;)</code></pre>
+</div>
+</div>
+<div id="data-acquisition" class="section level1">
+<h1><span class="header-section-number">2</span> Data Acquisition</h1>
+<div id="api" class="section level2">
+<h2><span class="header-section-number">2.1</span> API</h2>
+<div id="importing-libraries" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Importing Libraries</h3>
+</div>
+<div id="importing-data" class="section level3">
+<h3><span class="header-section-number">2.1.2</span> Importing data</h3>
+<pre class="r"><code>fun_trivia &lt;- GET(&#39;https://opentdb.com/api.php?amount=10&#39;)</code></pre>
+</div>
+<div id="exporting-to-a-tibble" class="section level3">
+<h3><span class="header-section-number">2.1.3</span> Exporting to a Tibble</h3>
+<pre class="r"><code>fun_trivia %&gt;%
+  .$content %&gt;%
+  rawToChar() %&gt;%
+  fromJSON() %&gt;%
+  as_tibble()</code></pre>
+<pre><code>## # A tibble: 10 x 2
+##    response_code results$category $type $difficulty $question $correct_answer
+##            &lt;int&gt; &lt;chr&gt;            &lt;chr&gt; &lt;chr&gt;       &lt;chr&gt;     &lt;chr&gt;          
+##  1             0 Science: Comput~ mult~ easy        In any p~ &amp;#039;For&amp;#039~
+##  2             0 History          mult~ medium      Which di~ Mao Zedong     
+##  3             0 History          mult~ hard        On which~ October 27, 19~
+##  4             0 General Knowled~ mult~ hard        What is ~ Feiji          
+##  5             0 Geography        mult~ hard        What is ~ Kaunas         
+##  6             0 Entertainment: ~ mult~ medium      What is ~ Earth-199999   
+##  7             0 General Knowled~ mult~ medium      What is ~ A flag         
+##  8             0 Entertainment: ~ mult~ hard        What pro~ Java           
+##  9             0 Animals          mult~ medium      What is ~ Pan troglodytes
+## 10             0 General Knowled~ mult~ medium      Which co~ Belgium        
+## # ... with 1 more variable: $incorrect_answers &lt;list&gt;</code></pre>
+</div>
+</div>
+<div id="scraping-data-from-competitor-website" class="section level2">
+<h2><span class="header-section-number">2.2</span> Scraping data from competitor Website</h2>
+<div id="importing-libraries-1" class="section level3">
+<h3><span class="header-section-number">2.2.1</span> Importing Libraries</h3>
+</div>
+<div id="extracting-data-from-rosebikes-website" class="section level3">
+<h3><span class="header-section-number">2.2.2</span> Extracting Data from Rosebikes Website</h3>
+<pre class="r"><code>url  &lt;- &quot;https://www.rosebikes.de/fahrr%C3%A4der/mtb&quot;
+rose_html &lt;- url %&gt;% 
+  read_html()</code></pre>
+</div>
+<div id="bike-names" class="section level3">
+<h3><span class="header-section-number">2.2.3</span> Bike Names</h3>
+<pre class="r"><code>rose_bike_names &lt;-  rose_html %&gt;% 
+  html_nodes(css = &quot;.catalog-category-bikes__title-text&quot;) %&gt;% 
+  html_text() %&gt;% 
+  str_extract(&quot;(?&lt;= ).*(?=)&quot;) %&gt;%
+  as_tibble()
+rose_bike_names</code></pre>
+<pre><code>## # A tibble: 9 x 1
+##   value     
+##   &lt;chr&gt;     
+## 1 CONTROL   
+## 2 MILLER    
+## 3 PEAK      
+## 4 BRUCE     
+## 5 SOLO      
+## 6 PATH      
+## 7 HILL      
+## 8 HILL TRAIL
+## 9 FIRE</code></pre>
+</div>
+<div id="bike-cost" class="section level3">
+<h3><span class="header-section-number">2.2.4</span> Bike Cost</h3>
+<pre class="r"><code>rose_bike_cost &lt;-  rose_html %&gt;% 
+  html_nodes(css = &quot;.catalog-category-bikes__price-title&quot;) %&gt;% 
+  html_text() %&gt;% 
+  str_extract(&quot;(?&lt;= ).*(?=)&quot;) %&gt;%
+  as_tibble()
+rose_bike_cost</code></pre>
+<pre><code>## # A tibble: 9 x 1
+##   value     
+##   &lt;chr&gt;     
+## 1 1.699,00 €
+## 2 1.999,00 €
+## 3 3.099,00 €
+## 4 &lt;NA&gt;      
+## 5 &lt;NA&gt;      
+## 6 1.849,00 €
+## 7 2.599,00 €
+## 8 2.899,00 €
+## 9 2.149,00 €</code></pre>
+</div>
+<div id="bike-description" class="section level3">
+<h3><span class="header-section-number">2.2.5</span> Bike Description</h3>
+<pre class="r"><code>rose_bike_description &lt;-  rose_html %&gt;% 
+  html_nodes(css = &quot;.catalog-category-bikes__subtitle&quot;) %&gt;% 
+  html_text() %&gt;% 
+  str_extract(&quot;(?&lt;= ).*(?=)&quot;) %&gt;%
+  as_tibble()
+rose_bike_description</code></pre>
+<pre><code>## # A tibble: 9 x 1
+##   value                                                          
+##   &lt;chr&gt;                                                          
+## 1 vielseitige Allrounder für Tour- und Trailspaß                 
+## 2 für heftige Lines in technischem Gelände                       
+## 3 Carbon-Trailbike mit Abfahrtsgenen                             
+## 4 Wanted Dirtbike                                                
+## 5 Topseller-Hardtail für Gelände und Alltag                      
+## 6 leichte Carbon-Hardtail für Highspeed im Gelände               
+## 7 vollgefedertes Carbon-Racebike für anspruchsvolle Strecken     
+## 8 Trail-Variante – Mehr Federweg für das schnelle Carbon-Racebike
+## 9 Drop in die Welt des Freeride Mountainbikings</code></pre>
+</div>
+<div id="display-details-in-a-tabular-format" class="section level3">
+<h3><span class="header-section-number">2.2.6</span> Display details in a Tabular format</h3>
+<pre class="r"><code>tibble(Bike_Model = rose_bike_names, Bike_cost = rose_bike_cost, Description = rose_bike_description)</code></pre>
+<pre><code>## # A tibble: 9 x 3
+##   Bike_Model$value Bike_cost$value Description$value                            
+##   &lt;chr&gt;            &lt;chr&gt;           &lt;chr&gt;                                        
+## 1 CONTROL          1.699,00 €      vielseitige Allrounder für Tour- und Trailsp~
+## 2 MILLER           1.999,00 €      für heftige Lines in technischem Gelände     
+## 3 PEAK             3.099,00 €      Carbon-Trailbike mit Abfahrtsgenen           
+## 4 BRUCE            &lt;NA&gt;            Wanted Dirtbike                              
+## 5 SOLO             &lt;NA&gt;            Topseller-Hardtail für Gelände und Alltag    
+## 6 PATH             1.849,00 €      leichte Carbon-Hardtail für Highspeed im Gel~
+## 7 HILL             2.599,00 €      vollgefedertes Carbon-Racebike für anspruchs~
+## 8 HILL TRAIL       2.899,00 €      Trail-Variante – Mehr Federweg für das schne~
+## 9 FIRE             2.149,00 €      Drop in die Welt des Freeride Mountainbikings</code></pre>
 </div>
 </div>
 </div>
-<div id="my-second-post-note-the-order" class="section level1">
-<h1><span class="header-section-number">2</span> My second post (note the order)</h1>
-<p>Last compiled: 2020-11-28</p>
-<p>I’m writing this tutorial going from the top down. And, this is how it will be printed. So, notice the second post is second in the list. If you want your most recent post to be at the top, then make a new post starting at the top. If you want the oldest first, do, then keep adding to the bottom</p>
+<div id="data-wrangling" class="section level1">
+<h1><span class="header-section-number">3</span> Data Wrangling</h1>
 </div>
-<div id="adding-r-stuff" class="section level1">
-<h1><span class="header-section-number">3</span> Adding R stuff</h1>
-<p>So far this is just a blog where you can write in plain text and serve your writing to a webpage. One of the main purposes of this lab journal is to record your progress learning R. The reason I am asking you to use this process is because you can both make a website, and a lab journal, and learn R all in R-studio. This makes everything really convenient and in the same place.</p>
-<p>So, let’s say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:</p>
-<pre class="r"><code>samples &lt;- rnorm(100, mean=0, sd=1)
-hist(samples)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
-<p>When you knit this R Markdown document, you will see that the histogram is printed to the page, along with the R code. This document can be set up to hide the R code in the webpage, just delete the comment (hashtag) from the cold folding option in the yaml header up top. For purposes of letting yourself see the code, and me see the code, best to keep it the way that it is. You’ll learn that all of these things and more can be customized in each R code block.</p>
+<div id="data-visualization" class="section level1">
+<h1><span class="header-section-number">4</span> Data Visualization</h1>
+<div id="challenge-cumulative-covid-plot" class="section level2">
+<h2><span class="header-section-number">4.1</span> Challenge : Cumulative Covid Plot</h2>
+<div id="import-covid-data" class="section level3">
+<h3><span class="header-section-number">4.1.1</span> Import Covid Data</h3>
+<pre class="r"><code>covid_data_tbl &lt;- read_csv(&quot;https://opendata.ecdc.europa.eu/covid19/casedistribution/csv&quot;)</code></pre>
+</div>
+<div id="simplified-covid_data_tbl" class="section level3">
+<h3><span class="header-section-number">4.1.2</span> Simplified covid_data_tbl</h3>
+<pre class="r"><code>covid_data_simplified &lt;- covid_data_tbl %&gt;%
+  select(dateRep, cases, countriesAndTerritories)</code></pre>
+</div>
+<div id="filter-with-countries-month" class="section level3">
+<h3><span class="header-section-number">4.1.3</span> Filter with countries &amp; month</h3>
+<pre class="r"><code>covid_data_countries_month &lt;- covid_data_simplified %&gt;%
+  filter(countriesAndTerritories %in% c(&quot;Germany&quot;, 
+                                        &quot;United_Kingdom&quot;,
+                                        &quot;France&quot;,
+                                        &quot;Spain&quot;,
+                                        &quot;United_States_of_America&quot;)) %&gt;%
+  mutate(date = lubridate::dmy(dateRep)) %&gt;%
+  group_by(countriesAndTerritories, date) %&gt;%
+  summarize(cumulative_cases = cumsum(cases)) %&gt;%
+  ungroup()</code></pre>
+</div>
+<div id="plot-the-cumulative-cases-in-year-2020" class="section level3">
+<h3><span class="header-section-number">4.1.4</span> Plot the Cumulative Cases in year 2020</h3>
+<pre class="r"><code>covid_data_countries_month %&gt;%
+  ggplot()+
+  geom_line(aes(x = date, y = cumulative_cases, color = countriesAndTerritories))+
+  labs(title = &quot; Covid-19 confirmed cases worldwide&quot;,
+       x = &quot;Year 2020&quot;,
+       y = &quot;Cumulative Cases&quot;
+       )</code></pre>
+<p><img src="journal_files/figure-html/unnamed-chunk-22-1.png" width="672" /> ### Challenge : Visualize distribution of mortality rate</p>
+<pre class="r"><code>world &lt;- map_data(&quot;world&quot;)
+
+covid_by_mortality_tbl &lt;- covid_data_tbl %&gt;%
+  mutate(across(countriesAndTerritories, str_replace_all, &quot;_&quot;, &quot; &quot;)) %&gt;%
+  mutate(countriesAndTerritories = case_when(
+    
+    countriesAndTerritories == &quot;United Kingdom&quot; ~ &quot;UK&quot;,
+    countriesAndTerritories == &quot;United States of America&quot; ~ &quot;USA&quot;,
+    countriesAndTerritories == &quot;Czechia&quot; ~ &quot;Czech Republic&quot;,
+    TRUE ~ countriesAndTerritories
+    
+  ))%&gt;%
+  group_by(countriesAndTerritories, popData2019, deaths) %&gt;%
+  summarise(total_pop = max(popData2019))%&gt;%
+  summarise(total_death = sum(deaths))%&gt;%
+  summarise(mortality =  (total_death)/(popData2019))
+
+class(covid_by_mortality_tbl)</code></pre>
+<pre><code>## [1] &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;</code></pre>
+<pre class="r"><code>setDT(covid_by_mortality_tbl)
+class(covid_by_mortality_tbl)</code></pre>
+<pre><code>## [1] &quot;data.table&quot; &quot;data.frame&quot;</code></pre>
+<pre class="r"><code>covid_by_mortality_tbl %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 214
+## Columns: 2
+## $ countriesAndTerritories &lt;chr&gt; &quot;Afghanistan&quot;, &quot;Albania&quot;, &quot;Algeria&quot;, &quot;Andor...
+## $ mortality               &lt;dbl&gt; 1.955746e-05, 6.637724e-05, 9.476680e-06, 2...</code></pre>
+<pre class="r"><code>setDT(world)
+world %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 99,338
+## Columns: 6
+## $ long      &lt;dbl&gt; -69.89912, -69.89571, -69.94219, -70.00415, -70.06612, -7...
+## $ lat       &lt;dbl&gt; 12.45200, 12.42300, 12.43853, 12.50049, 12.54697, 12.5970...
+## $ group     &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, ...
+## $ order     &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18...
+## $ region    &lt;chr&gt; &quot;Aruba&quot;, &quot;Aruba&quot;, &quot;Aruba&quot;, &quot;Aruba&quot;, &quot;Aruba&quot;, &quot;Aruba&quot;, &quot;Ar...
+## $ subregion &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...</code></pre>
+<pre class="r"><code>tic()
+covid_by_map_tbl &lt;- merge(x = world, y = covid_by_mortality_tbl, 
+                          by.x = &quot;region&quot;, by.y = &quot;countriesAndTerritories&quot;,
+                          all.x = TRUE, 
+                          all.y = FALSE)
+
+toc()</code></pre>
+<pre><code>## 0.03 sec elapsed</code></pre>
+<pre class="r"><code>covid_by_map_tbl%&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 99,338
+## Columns: 7
+## $ region    &lt;chr&gt; &quot;Afghanistan&quot;, &quot;Afghanistan&quot;, &quot;Afghanistan&quot;, &quot;Afghanistan...
+## $ long      &lt;dbl&gt; 74.89131, 74.84023, 74.76738, 74.73896, 74.72666, 74.6689...
+## $ lat       &lt;dbl&gt; 37.23164, 37.22505, 37.24917, 37.28564, 37.29072, 37.2667...
+## $ group     &lt;dbl&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, ...
+## $ order     &lt;int&gt; 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 2...
+## $ subregion &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
+## $ mortality &lt;dbl&gt; 1.955746e-05, 1.955746e-05, 1.955746e-05, 1.955746e-05, 1...</code></pre>
+<pre class="r"><code>setkey(covid_by_map_tbl, &quot;region&quot;)
+key(covid_by_map_tbl)</code></pre>
+<pre><code>## [1] &quot;region&quot;</code></pre>
+<pre class="r"><code>?setorder(region, -mortality, long, lat)
+setorderv(covid_by_map_tbl, c(&quot;mortality&quot;, &quot;region&quot;, &quot;long&quot;, &quot;lat&quot;), order = -1)
+
+covid_by_map_tbl%&gt;%
+  ggplot() +
+  geom_map(aes(x = long, y = lat, map_id = region, fill = mortality),map = world) +
+  scale_fill_continuous(labels = scales::percent)+
+  labs(title = &quot;Confirmed Covid19 deaths relative to size of the population &quot;,
+       subtitle = &quot;More than 1.2 Million confirmed covid19 deaths worldwide&quot;)</code></pre>
+<p><img src="journal_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+</div>
+</div>
 </div>
 
 
