@@ -169,7 +169,77 @@ rose_bike_description
 tibble(Bike_Model = rose_bike_names, Bike_cost = rose_bike_cost, Description = rose_bike_description)
 ```
 # Data Wrangling
+## Importing headers
+```{r, include=FALSE}
+library(tidyverse)
+library(vroom)
+library(data.table)
+library(tictoc)
+library(vroom)
+```
+## Importing Data
+```{r}
+assignee_col_types <- list(
+  id = col_character(),
+  type = col_integer(),
+  name_first= col_skip(),
+  name_last = col_skip(),
+  organization = col_character()
+)
 
+assignee_tbl <- vroom(
+  file       = "C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/03_patent/assignee.tsv", 
+  delim      = "\t", 
+  col_types  = assignee_col_types,
+  na         = c("", "NA", "NULL")
+)
+
+assignee_tbl
+setDT(assignee_tbl)
+
+patent_assignee_col_types <- list(
+  patent_id = col_character(),
+  assignee_id = col_character(),
+  location_id = col_skip()
+)
+
+patent_assignee_tbl <- vroom(
+  file       = "C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/03_patent/patent_assignee.tsv", 
+  delim      = "\t", 
+  col_types  = patent_assignee_col_types,
+  na         = c("", "NA", "NULL")
+)
+
+patent_assignee_tbl
+setDT(patent_assignee_tbl)
+
+tic()
+patent_assignee_merged_tbl <- merge(x = patent_assignee_tbl, y = assignee_tbl, 
+                                      by.x = "assignee_id", by.y = "id",
+                                      all.x = TRUE, 
+                                      all.y = TRUE)
+toc()
+
+patent_assignee_merged_tbl
+
+setkey(patent_assignee_merged_tbl, "type")
+key(patent_assignee_merged_tbl)
+?setorder()
+setorderv(patent_assignee_merged_tbl, c("type", "organization"))
+```
+## Patent Domination by Companies in USA
+```{r}
+patent_assignee_merge_tbl_usa <- patent_assignee_merged_tbl[ (type == 2)]
+patent_assignee_merge_tbl_usa
+
+tic()
+most_patents_usa <- patent_assignee_merge_tbl_usa[!is.na(organization), .N, by = organization]
+toc()
+setkey(most_patents_usa, "organization")
+key(most_patents_usa)
+setorderv(most_patents_usa, c("N", "organization"), order = -1)
+as_tibble(most_patents_usa, .rows = 10)
+```
 
 # Data Visualization
 ```{r, include=FALSE}
