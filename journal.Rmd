@@ -1,7 +1,7 @@
 ---
-title: "Journal (reproducible report)"
+title: "Journal (Business Data Science Basics)"
 author: "Aashik Udupi"
-date: "2020-11-05"
+date: "2020-12-05"
 output:
   html_document:
     toc: true
@@ -11,44 +11,255 @@ output:
     toc_depth: 3
     #code_folding: hide
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message=FALSE,warning=FALSE, cache=TRUE)
 ```
 
-**IMPORTANT:** You can delete everything in here and start fresh. You might want to start by not deleting anything above this line until you know what that stuff is doing.
-
-This is an `.Rmd` file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a \# in front of your text, it will create a top level-header.
-
-# My first post
-
-Last compiled: `r Sys.Date()`
-
-Notice that whatever you define as a top level header, automatically gets put into the table of contents bar on the left. 
-
-## Second level header
-
-You can add more headers by adding more hashtags. These won't be put into the table of contents
-
-### third level header
-
-Here's an even lower level header
-
-# My second post (note the order)
-
-Last compiled: `r Sys.Date()`
-
-I'm writing this tutorial going from the top down. And, this is how it will be printed. So, notice the second post is second in the list. If you want your most recent post to be at the top, then make a new post starting at the top. If you want the oldest first, do, then keep adding to the bottom
-
-# Adding R stuff
-
-So far this is just a blog where you can write in plain text and serve your writing to a webpage. One of the main purposes of this lab journal is to record your progress learning R. The reason I am asking you to use this process is because you can both make a website, and a lab journal, and learn R all in R-studio. This makes everything really convenient and in the same place. 
-
-So, let's say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:
-
+# Sales Analysis   
+## Importing all required libraries
+```{r, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(writexl)
+```
+## Importing Files 
 ```{r}
-samples <- rnorm(100, mean=0, sd=1)
-hist(samples)
+bikeshops_tbl  <- read_excel(path = "C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/01_raw_data/bikeshops.xlsx")
+bikes_tbl      <- read_excel(path = "C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/01_raw_data/bikes.xlsx")
+orderlines_tbl <- read_excel(path = "C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/01_raw_data/orderlines.xlsx")
+```
+## Examining Data 
+```{r}
+bikeshops_tbl
+bikes_tbl
+orderlines_tbl
+```
+## Split Location : City, State 
+```{r}
+bike_shops_wrangled_tbl <- bikeshops_tbl %>%
+  separate(col    = location,
+           into   = c("city", "state"),
+           sep    = ",") 
+bike_shops_wrangled_tbl
+```
+## Simplify the data 
+```{r}
+bikes_simplified_tbl <- bikes_tbl %>%
+  select(bike.id, model, price)
+
+orderlines_simplified_tbl <- orderlines_tbl %>%
+  select(...1, order.id, order.line, customer.id, product.id, quantity)
+
+bikeshops_simplified_tbl <- bike_shops_wrangled_tbl %>% 
+  select(bikeshop.id, city, state)
+bikes_orderlines_tbl <- left_join(orderlines_simplified_tbl, bikes_simplified_tbl, by = c( "product.id" = "bike.id"))
+
+bikes_summary_tbl <- left_join(bikes_orderlines_tbl, bikeshops_simplified_tbl, by = c( "customer.id" = "bikeshop.id"))
+bikes_summary_tbl
+```
+## Sales by State 
+```{r}
+sales_by_loc_tbl <- bikes_summary_tbl %>%
+  select(state, price) %>%
+  group_by(state) %>%
+  summarize(sales = sum(price)) %>%
+  mutate(Total_sales_in_Euro = scales::dollar(sales, big.mark = ".", 
+                                              decimal.mark = ",", 
+                                              prefix = "", 
+                                              suffix = " €"))
+sales_by_loc_tbl
+```
+## Bar Graph Plot
+```{r}
+sales_by_loc_tbl %>%
+  ggplot(aes(x = state, y = sales)) +
+  
+  geom_col(fill = "#2DC6D6") + # Use geom_col for a bar plot
+  geom_label(aes(label = Total_sales_in_Euro)) + # Adding labels to the bars
+  geom_smooth(method = "lm", se = FALSE) + # Adding a trendline
+  
+  scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
+                                                    decimal.mark = ",", 
+                                                    prefix = "", 
+                                                    suffix = " €")) +
+  labs(
+    title = "Revenue by State",
+    x = "State", 
+    y = "Revenue"
+  )
+```
+## Writing Files 
+```{r}
+### Exporting to excel file
+sales_by_loc_tbl %>%
+  write_xlsx("C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/02_wrangled_data/sales_by_loc_tbl.xlsx")
+### Exporting to csv file
+sales_by_loc_tbl %>% 
+  write_csv("C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/02_wrangled_data/sales_by_loc_tbl.csv")
+### Exporting to rds file
+sales_by_loc_tbl %>% 
+  write_rds("C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/02_wrangled_data/sales_by_loc_tbl.rds")
+```
+# Data Acquisition
+## API
+### Importing Libraries
+```{r,include = FALSE}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+```
+### Importing data 
+```{r}
+fun_trivia <- GET('https://opentdb.com/api.php?amount=10')
+```
+### Exporting to a Tibble
+```{r}
+fun_trivia %>%
+  .$content %>%
+  rawToChar() %>%
+  fromJSON() %>%
+  as_tibble()
 ```
 
-When you knit this R Markdown document, you will see that the histogram is printed to the page, along with the R code. This document can be set up to hide the R code in the webpage, just delete the comment (hashtag) from the cold folding option in the yaml header up top. For purposes of letting yourself see the code, and me see the code, best to keep it the way that it is. You'll learn that all of these things and more can be customized in each R code block.
+## Scraping data from competitor Website
+### Importing Libraries
+```{r, include=FALSE}
+library(tidyverse) 
+library(rvest)     
+library(xopen)     
+library(jsonlite)  
+library(glue)      
+library(stringi) 
+```
+### Extracting Data from Rosebikes Website
+```{r}
+url  <- "https://www.rosebikes.de/fahrr%C3%A4der/mtb"
+rose_html <- url %>% 
+  read_html()
+```
+### Bike Names
+```{r}
+rose_bike_names <-  rose_html %>% 
+  html_nodes(css = ".catalog-category-bikes__title-text") %>% 
+  html_text() %>% 
+  str_extract("(?<= ).*(?=)") %>%
+  as_tibble()
+rose_bike_names
+```
+### Bike Cost
+```{r}
+rose_bike_cost <-  rose_html %>% 
+  html_nodes(css = ".catalog-category-bikes__price-title") %>% 
+  html_text() %>% 
+  str_extract("(?<= ).*(?=)") %>%
+  as_tibble()
+rose_bike_cost
+```
+### Bike Description
+```{r}
+rose_bike_description <-  rose_html %>% 
+  html_nodes(css = ".catalog-category-bikes__subtitle") %>% 
+  html_text() %>% 
+  str_extract("(?<= ).*(?=)") %>%
+  as_tibble()
+rose_bike_description
+```
+### Display details in a Tabular format
+```{r}
+tibble(Bike_Model = rose_bike_names, Bike_cost = rose_bike_cost, Description = rose_bike_description)
+```
+# Data Wrangling
+
+
+# Data Visualization
+```{r, include=FALSE}
+library(tidyverse)
+library(vroom)
+library(tictoc)
+library(data.table)
+library(ggplot2)
+library(scales)
+library(lubridate)
+library(maps)
+```
+## Challenge : Cumulative Covid Plot
+### Import Covid Data
+```{r}
+covid_data_tbl <- read_csv("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv")
+```
+### Simplified covid_data_tbl 
+```{r}
+covid_data_simplified <- covid_data_tbl %>%
+  select(dateRep, cases, countriesAndTerritories)
+```
+### Filter with countries & month
+```{r}
+covid_data_countries_month <- covid_data_simplified %>%
+  filter(countriesAndTerritories %in% c("Germany", 
+                                        "United_Kingdom",
+                                        "France",
+                                        "Spain",
+                                        "United_States_of_America")) %>%
+  mutate(date = lubridate::dmy(dateRep)) %>%
+  group_by(countriesAndTerritories, date) %>%
+  summarize(cumulative_cases = cumsum(cases)) %>%
+  ungroup()
+```
+### Plot the Cumulative Cases in year 2020 
+```{r}
+covid_data_countries_month %>%
+  ggplot()+
+  geom_line(aes(x = date, y = cumulative_cases, color = countriesAndTerritories))+
+  labs(title = " Covid-19 confirmed cases worldwide",
+       x = "Year 2020",
+       y = "Cumulative Cases"
+       )
+```
+### Challenge : Visualize distribution of mortality rate
+```{r}
+world <- map_data("world")
+
+covid_by_mortality_tbl <- covid_data_tbl %>%
+  mutate(across(countriesAndTerritories, str_replace_all, "_", " ")) %>%
+  mutate(countriesAndTerritories = case_when(
+    
+    countriesAndTerritories == "United Kingdom" ~ "UK",
+    countriesAndTerritories == "United States of America" ~ "USA",
+    countriesAndTerritories == "Czechia" ~ "Czech Republic",
+    TRUE ~ countriesAndTerritories
+    
+  ))%>%
+  group_by(countriesAndTerritories, popData2019, deaths) %>%
+  summarise(total_pop = max(popData2019))%>%
+  summarise(total_death = sum(deaths))%>%
+  summarise(mortality =  (total_death)/(popData2019))
+
+class(covid_by_mortality_tbl)
+setDT(covid_by_mortality_tbl)
+class(covid_by_mortality_tbl)
+covid_by_mortality_tbl %>% glimpse()
+setDT(world)
+world %>% glimpse()
+
+tic()
+covid_by_map_tbl <- merge(x = world, y = covid_by_mortality_tbl, 
+                          by.x = "region", by.y = "countriesAndTerritories",
+                          all.x = TRUE, 
+                          all.y = FALSE)
+
+toc()
+covid_by_map_tbl%>% glimpse()
+
+setkey(covid_by_map_tbl, "region")
+key(covid_by_map_tbl)
+
+?setorder(region, -mortality, long, lat)
+setorderv(covid_by_map_tbl, c("mortality", "region", "long", "lat"), order = -1)
+
+covid_by_map_tbl%>%
+  ggplot() +
+  geom_map(aes(x = long, y = lat, map_id = region, fill = mortality),map = world) +
+  scale_fill_continuous(labels = scales::percent)+
+  labs(title = "Confirmed Covid19 deaths relative to size of the population ",
+       subtitle = "More than 1.2 Million confirmed covid19 deaths worldwide")
+```
