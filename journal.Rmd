@@ -1,7 +1,7 @@
 ---
 title: "Journal (Business Data Science Basics)"
 author: "Aashik Udupi"
-date: "2020-12-05"
+date: "2020-12-06"
 output:
   html_document:
     toc: true

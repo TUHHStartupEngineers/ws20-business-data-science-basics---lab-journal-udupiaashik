@@ -11,17 +11,17 @@ output: html_document
 
 # Contents
 
-## 1.0 Sales Analysis
-### 1.1 Sales by Location (Bar Graph)
+## 1.0   Sales Analysis
+### 1.1     Sales by Location (Bar Graph)
 
-## 2.0 Data Acquisition - Challenge
-### 2.1 API - Data 
-### 2.2 Scrapping Data from Website
+## 2.0   Data Acquisition - Challenge
+### 2.1     API - Data 
+### 2.2     Scrapping Data from Website
 
-## 3.0Data Wrangling
-### 3.1 Company with highest number of patents
-### 3.2 Company with highest patent granted in 2019
+## 3.0   Data Wrangling
+### 3.1     Company with highest number of patents
+### 3.2     Company with highest patent granted in 2019
 
-## 4.0 Data Visualization
-### 4.1 Visualize distribution of mortality rate
-### 4.2 Cumulative Cases in year 2020
+## 4.0   Data Visualization
+### 4.1     Visualize distribution of mortality rate
+### 4.2     Cumulative Cases in year 2020
