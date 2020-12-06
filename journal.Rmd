@@ -240,7 +240,68 @@ key(most_patents_usa)
 setorderv(most_patents_usa, c("N", "organization"), order = -1)
 as_tibble(most_patents_usa, .rows = 10)
 ```
+## Company with highest number of patents 
+```{r}
+col_types_patent <- list(
+  id = col_character(),
+  date = col_date("%Y-%m-%d"),
+  num_claims = col_integer(),
+  type = col_skip(),
+  number = col_skip(),
+  country = col_skip(),
+  abstract = col_skip(),
+  kind = col_skip(),
+  filename = col_skip(),
+  withdrawn = col_skip(),
+  title = col_skip()
+)
 
+patent_tbl <- vroom(
+  file       = "C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/03_patent/patent.tsv", 
+  delim      = "\t", 
+  col_types  = col_types_patent,
+  na         = c("", "NA", "NULL")
+)
+
+setDT(patent_tbl)
+
+tic()
+patent_assignee_merge2_tbl <- merge(x = patent_assignee_merged_tbl, y = patent_tbl,
+                                             by.x = "patent_id", by.y = "id",
+                                             all.x = TRUE,
+                                             all.y = TRUE)
+
+toc()
+
+patent_assignee_merge2_tbl 
+```
+```{r}
+setkey(patent_assignee_merge2_tbl, "type")
+key(patent_assignee_merge2_tbl)
+
+?setorder()
+setorderv(patent_assignee_merge2_tbl, c("type", "organization"))
+```
+## Company with highest patent granted in 2019
+```{r}
+patent_assignee_merge2_tbl_usa <- patent_assignee_merge2_tbl[ (type == '2') ]
+
+highest_patent_year <- patent_assignee_merge2_tbl_usa %>%
+  select(organization, num_claims, date) %>%
+  mutate(year = year(date))
+
+highest_patent_year_2019 <- highest_patent_year[ (year == '2019') ]
+
+setkey(highest_patent_year_2019, "organization")
+key(highest_patent_year_2019)
+
+setorderv(highest_patent_year_2019, c("num_claims", "organization"), order = -1)
+
+task_2_ans <- highest_patent_year_2019 %>%
+  select(organization, num_claims, date)
+
+as_tibble(task_2_ans, .rows = 10)
+```
 # Data Visualization
 ```{r, include=FALSE}
 library(tidyverse)
