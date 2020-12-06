@@ -861,6 +861,115 @@ as_tibble(most_patents_usa, .rows = 10)</code></pre>
 ##  9 Xerox Corporation                            23174
 ## 10 Apple Inc.                                   21821</code></pre>
 </div>
+<div id="company-with-highest-number-of-patents" class="section level2">
+<h2><span class="header-section-number">3.4</span> Company with highest number of patents</h2>
+<pre class="r"><code>col_types_patent &lt;- list(
+  id = col_character(),
+  date = col_date(&quot;%Y-%m-%d&quot;),
+  num_claims = col_integer(),
+  type = col_skip(),
+  number = col_skip(),
+  country = col_skip(),
+  abstract = col_skip(),
+  kind = col_skip(),
+  filename = col_skip(),
+  withdrawn = col_skip(),
+  title = col_skip()
+)
+
+patent_tbl &lt;- vroom(
+  file       = &quot;C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/03_patent/patent.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types_patent,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+setDT(patent_tbl)
+
+tic()
+patent_assignee_merge2_tbl &lt;- merge(x = patent_assignee_merged_tbl, y = patent_tbl,
+                                             by.x = &quot;patent_id&quot;, by.y = &quot;id&quot;,
+                                             all.x = TRUE,
+                                             all.y = TRUE)
+
+toc()</code></pre>
+<pre><code>## 65.75 sec elapsed</code></pre>
+<pre class="r"><code>patent_assignee_merge2_tbl </code></pre>
+<pre><code>##          patent_id              assignee_id type
+##       1:      &lt;NA&gt; per_3mNzDXlijqU11Mla0Wpt   NA
+##       2:      &lt;NA&gt; per_BxKFSQpxRw6OW3Qt4LJJ   NA
+##       3:      &lt;NA&gt; per_FP6Fej8RptR1mTCj1ilv   NA
+##       4:      &lt;NA&gt; per_GxUI3YB6B1dqZnSaVWBX   NA
+##       5:      &lt;NA&gt; per_MXaaRlxceiXDKh7pofqc   NA
+##      ---                                        
+## 8163188:   T998013 org_FhCG5uAlmrt4iIEk3h5a    6
+## 8163189:   T998014 org_8WujSDQFoxF1D6UMqVCV    2
+## 8163190:   T999001                     &lt;NA&gt;   NA
+## 8163191:   T999002                     &lt;NA&gt;   NA
+## 8163192:   T999003                     &lt;NA&gt;   NA
+##                                                                         organization
+##       1:                                                                        &lt;NA&gt;
+##       2:                                                                        &lt;NA&gt;
+##       3:                                                                        &lt;NA&gt;
+##       4:                                                                        &lt;NA&gt;
+##       5:                                                                        &lt;NA&gt;
+##      ---                                                                            
+## 8163188: The United States of America as represented by the Secretary of Agriculture
+## 8163189:                                                       Eastman Kodak Company
+## 8163190:                                                                        &lt;NA&gt;
+## 8163191:                                                                        &lt;NA&gt;
+## 8163192:                                                                        &lt;NA&gt;
+##                date num_claims
+##       1:       &lt;NA&gt;         NA
+##       2:       &lt;NA&gt;         NA
+##       3:       &lt;NA&gt;         NA
+##       4:       &lt;NA&gt;         NA
+##       5:       &lt;NA&gt;         NA
+##      ---                      
+## 8163188: 1980-09-02          1
+## 8163189: 1980-09-02          3
+## 8163190: 1980-10-07          1
+## 8163191: 1980-10-07          7
+## 8163192: 1980-10-07          3</code></pre>
+<pre class="r"><code>setkey(patent_assignee_merge2_tbl, &quot;type&quot;)
+key(patent_assignee_merge2_tbl)</code></pre>
+<pre><code>## [1] &quot;type&quot;</code></pre>
+<pre class="r"><code>?setorder()
+setorderv(patent_assignee_merge2_tbl, c(&quot;type&quot;, &quot;organization&quot;))</code></pre>
+</div>
+<div id="company-with-highest-patent-granted-in-2019" class="section level2">
+<h2><span class="header-section-number">3.5</span> Company with highest patent granted in 2019</h2>
+<pre class="r"><code>patent_assignee_merge2_tbl_usa &lt;- patent_assignee_merge2_tbl[ (type == &#39;2&#39;) ]
+
+highest_patent_year &lt;- patent_assignee_merge2_tbl_usa %&gt;%
+  select(organization, num_claims, date) %&gt;%
+  mutate(year = year(date))
+
+highest_patent_year_2019 &lt;- highest_patent_year[ (year == &#39;2019&#39;) ]
+
+setkey(highest_patent_year_2019, &quot;organization&quot;)
+key(highest_patent_year_2019)</code></pre>
+<pre><code>## [1] &quot;organization&quot;</code></pre>
+<pre class="r"><code>setorderv(highest_patent_year_2019, c(&quot;num_claims&quot;, &quot;organization&quot;), order = -1)
+
+task_2_ans &lt;- highest_patent_year_2019 %&gt;%
+  select(organization, num_claims, date)
+
+as_tibble(task_2_ans, .rows = 10)</code></pre>
+<pre><code>## # A tibble: 10 x 3
+##    organization                               num_claims date      
+##    &lt;chr&gt;                                           &lt;int&gt; &lt;date&gt;    
+##  1 MonoSol, LLC                                      358 2019-02-12
+##  2 Sitting Man, LLC                                  227 2019-09-10
+##  3 PPC Broadband, Inc.                               221 2019-09-17
+##  4 IOENGINE, LLC                                     205 2019-08-27
+##  5 Sanford-Burnham Medical Research Institute        198 2019-08-06
+##  6 IOENGINE, LLC                                     192 2019-10-15
+##  7 Federal Express Corporation                       190 2019-11-19
+##  8 IMMUNOLIGHT, LLC                                  188 2019-12-03
+##  9 Duke University                                   188 2019-12-03
+## 10 Genentech, Inc.                                   184 2019-03-12</code></pre>
+</div>
 </div>
 <div id="data-visualization" class="section level1">
 <h1><span class="header-section-number">4</span> Data Visualization</h1>
@@ -897,7 +1006,7 @@ as_tibble(most_patents_usa, .rows = 10)</code></pre>
        x = &quot;Year 2020&quot;,
        y = &quot;Cumulative Cases&quot;
        )</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-25-1.png" width="672" /> ### Challenge : Visualize distribution of mortality rate</p>
+<p><img src="journal_files/figure-html/unnamed-chunk-28-1.png" width="672" /> ### Challenge : Visualize distribution of mortality rate</p>
 <pre class="r"><code>world &lt;- map_data(&quot;world&quot;)
 
 covid_by_mortality_tbl &lt;- covid_data_tbl %&gt;%
@@ -942,7 +1051,7 @@ covid_by_map_tbl &lt;- merge(x = world, y = covid_by_mortality_tbl,
                           all.y = FALSE)
 
 toc()</code></pre>
-<pre><code>## 0.02 sec elapsed</code></pre>
+<pre><code>## 4.56 sec elapsed</code></pre>
 <pre class="r"><code>covid_by_map_tbl%&gt;% glimpse()</code></pre>
 <pre><code>## Rows: 99,338
 ## Columns: 7
@@ -965,7 +1074,7 @@ covid_by_map_tbl%&gt;%
   scale_fill_continuous(labels = scales::percent)+
   labs(title = &quot;Confirmed Covid19 deaths relative to size of the population &quot;,
        subtitle = &quot;More than 1.2 Million confirmed covid19 deaths worldwide&quot;)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<p><img src="journal_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
 </div>
 </div>
 </div>
