@@ -23,5 +23,5 @@ output: html_document
 ### 3.2     Company with highest patent granted in 2019
 
 ## 4.0   Data Visualization
-### 4.1     Visualize distribution of mortality rate
-### 4.2     Cumulative Cases in year 2020
+### 4.1     Cumulative Covid Cases
+### 4.2     Visualize distribution of mortality rate
