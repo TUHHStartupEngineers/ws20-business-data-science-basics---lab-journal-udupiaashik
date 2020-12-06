@@ -224,7 +224,6 @@ patent_assignee_merged_tbl
 
 setkey(patent_assignee_merged_tbl, "type")
 key(patent_assignee_merged_tbl)
-?setorder()
 setorderv(patent_assignee_merged_tbl, c("type", "organization"))
 ```
 ## Patent Domination by Companies in USA
@@ -279,7 +278,6 @@ patent_assignee_merge2_tbl
 setkey(patent_assignee_merge2_tbl, "type")
 key(patent_assignee_merge2_tbl)
 
-?setorder()
 setorderv(patent_assignee_merge2_tbl, c("type", "organization"))
 ```
 ## Company with highest patent granted in 2019
@@ -384,7 +382,6 @@ covid_by_map_tbl%>% glimpse()
 setkey(covid_by_map_tbl, "region")
 key(covid_by_map_tbl)
 
-?setorder(region, -mortality, long, lat)
 setorderv(covid_by_map_tbl, c("mortality", "region", "long", "lat"), order = -1)
 
 covid_by_map_tbl%>%

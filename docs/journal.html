@@ -778,7 +778,7 @@ patent_assignee_merged_tbl &lt;- merge(x = patent_assignee_tbl, y = assignee_tbl
                                       all.x = TRUE, 
                                       all.y = TRUE)
 toc()</code></pre>
-<pre><code>## 23.79 sec elapsed</code></pre>
+<pre><code>## 24.5 sec elapsed</code></pre>
 <pre class="r"><code>patent_assignee_merged_tbl</code></pre>
 <pre><code>##                       assignee_id patent_id type
 ##       1:                     &lt;NA&gt;   9381169   NA
@@ -807,8 +807,7 @@ toc()</code></pre>
 <pre class="r"><code>setkey(patent_assignee_merged_tbl, &quot;type&quot;)
 key(patent_assignee_merged_tbl)</code></pre>
 <pre><code>## [1] &quot;type&quot;</code></pre>
-<pre class="r"><code>?setorder()
-setorderv(patent_assignee_merged_tbl, c(&quot;type&quot;, &quot;organization&quot;))</code></pre>
+<pre class="r"><code>setorderv(patent_assignee_merged_tbl, c(&quot;type&quot;, &quot;organization&quot;))</code></pre>
 </div>
 <div id="patent-domination-by-companies-in-usa" class="section level2">
 <h2><span class="header-section-number">3.3</span> Patent Domination by Companies in USA</h2>
@@ -934,8 +933,7 @@ toc()</code></pre>
 <pre class="r"><code>setkey(patent_assignee_merge2_tbl, &quot;type&quot;)
 key(patent_assignee_merge2_tbl)</code></pre>
 <pre><code>## [1] &quot;type&quot;</code></pre>
-<pre class="r"><code>?setorder()
-setorderv(patent_assignee_merge2_tbl, c(&quot;type&quot;, &quot;organization&quot;))</code></pre>
+<pre class="r"><code>setorderv(patent_assignee_merge2_tbl, c(&quot;type&quot;, &quot;organization&quot;))</code></pre>
 </div>
 <div id="company-with-highest-patent-granted-in-2019" class="section level2">
 <h2><span class="header-section-number">3.5</span> Company with highest patent granted in 2019</h2>
@@ -1051,7 +1049,7 @@ covid_by_map_tbl &lt;- merge(x = world, y = covid_by_mortality_tbl,
                           all.y = FALSE)
 
 toc()</code></pre>
-<pre><code>## 4.56 sec elapsed</code></pre>
+<pre><code>## 0.22 sec elapsed</code></pre>
 <pre class="r"><code>covid_by_map_tbl%&gt;% glimpse()</code></pre>
 <pre><code>## Rows: 99,338
 ## Columns: 7
@@ -1065,8 +1063,7 @@ toc()</code></pre>
 <pre class="r"><code>setkey(covid_by_map_tbl, &quot;region&quot;)
 key(covid_by_map_tbl)</code></pre>
 <pre><code>## [1] &quot;region&quot;</code></pre>
-<pre class="r"><code>?setorder(region, -mortality, long, lat)
-setorderv(covid_by_map_tbl, c(&quot;mortality&quot;, &quot;region&quot;, &quot;long&quot;, &quot;lat&quot;), order = -1)
+<pre class="r"><code>setorderv(covid_by_map_tbl, c(&quot;mortality&quot;, &quot;region&quot;, &quot;long&quot;, &quot;lat&quot;), order = -1)
 
 covid_by_map_tbl%&gt;%
   ggplot() +
