@@ -316,33 +316,28 @@ library(maps)
 ```{r}
 covid_data_tbl <- read_csv("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv")
 ```
-### Simplified covid_data_tbl 
-```{r}
-covid_data_simplified <- covid_data_tbl %>%
-  select(dateRep, cases, countriesAndTerritories)
-```
 ### Filter with countries & month
 ```{r}
-covid_data_countries_month <- covid_data_simplified %>%
-  filter(countriesAndTerritories %in% c("Germany", 
+covid_data_by_month_tbl <- covid_data_tbl %>% map_df(rev) %>%
+  select(cases, countriesAndTerritories, dateRep) %>%
+  filter(countriesAndTerritories %in% c("Germany",
                                         "United_Kingdom",
                                         "France",
                                         "Spain",
+                                        "India",
                                         "United_States_of_America")) %>%
-  mutate(date = lubridate::dmy(dateRep)) %>%
-  group_by(countriesAndTerritories, date) %>%
-  summarize(cumulative_cases = cumsum(cases)) %>%
-  ungroup()
+  mutate(date = dmy(dateRep)) %>% group_by( countriesAndTerritories ) %>%
+  mutate(total_cases = cumsum(cases))# %>%
 ```
 ### Plot the Cumulative Cases in year 2020 
 ```{r}
-covid_data_countries_month %>%
-  ggplot()+
-  geom_line(aes(x = date, y = cumulative_cases, color = countriesAndTerritories))+
-  labs(title = " Covid-19 confirmed cases worldwide",
+covid_data_by_month_tbl%>%
+  ggplot(aes(x = date, y = total_cases, color = countriesAndTerritories)) +
+  geom_smooth(method = "gam", se = FALSE) +
+  scale_color_manual(values=c("#000000", "#ff0016", "#3ea6d7", "#feff00", "#106a00", "#ff8e02"))+
+  labs(title = "Confirmed covid cases worldwide",
        x = "Year 2020",
-       y = "Cumulative Cases"
-       )
+       y = "Cases")
 ```
 ### Challenge : Visualize distribution of mortality rate
 ```{r}
@@ -391,3 +386,5 @@ covid_by_map_tbl%>%
   labs(title = "Confirmed Covid19 deaths relative to size of the population ",
        subtitle = "More than 1.2 Million confirmed covid19 deaths worldwide")
 ```
+
+

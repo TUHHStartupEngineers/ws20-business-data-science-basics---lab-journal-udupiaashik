@@ -977,34 +977,29 @@ as_tibble(task_2_ans, .rows = 10)</code></pre>
 <h3><span class="header-section-number">4.1.1</span> Import Covid Data</h3>
 <pre class="r"><code>covid_data_tbl &lt;- read_csv(&quot;https://opendata.ecdc.europa.eu/covid19/casedistribution/csv&quot;)</code></pre>
 </div>
-<div id="simplified-covid_data_tbl" class="section level3">
-<h3><span class="header-section-number">4.1.2</span> Simplified covid_data_tbl</h3>
-<pre class="r"><code>covid_data_simplified &lt;- covid_data_tbl %&gt;%
-  select(dateRep, cases, countriesAndTerritories)</code></pre>
-</div>
 <div id="filter-with-countries-month" class="section level3">
-<h3><span class="header-section-number">4.1.3</span> Filter with countries &amp; month</h3>
-<pre class="r"><code>covid_data_countries_month &lt;- covid_data_simplified %&gt;%
-  filter(countriesAndTerritories %in% c(&quot;Germany&quot;, 
+<h3><span class="header-section-number">4.1.2</span> Filter with countries &amp; month</h3>
+<pre class="r"><code>covid_data_by_month_tbl &lt;- covid_data_tbl %&gt;% map_df(rev) %&gt;%
+  select(cases, countriesAndTerritories, dateRep) %&gt;%
+  filter(countriesAndTerritories %in% c(&quot;Germany&quot;,
                                         &quot;United_Kingdom&quot;,
                                         &quot;France&quot;,
                                         &quot;Spain&quot;,
+                                        &quot;India&quot;,
                                         &quot;United_States_of_America&quot;)) %&gt;%
-  mutate(date = lubridate::dmy(dateRep)) %&gt;%
-  group_by(countriesAndTerritories, date) %&gt;%
-  summarize(cumulative_cases = cumsum(cases)) %&gt;%
-  ungroup()</code></pre>
+  mutate(date = dmy(dateRep)) %&gt;% group_by( countriesAndTerritories ) %&gt;%
+  mutate(total_cases = cumsum(cases))# %&gt;%</code></pre>
 </div>
 <div id="plot-the-cumulative-cases-in-year-2020" class="section level3">
-<h3><span class="header-section-number">4.1.4</span> Plot the Cumulative Cases in year 2020</h3>
-<pre class="r"><code>covid_data_countries_month %&gt;%
-  ggplot()+
-  geom_line(aes(x = date, y = cumulative_cases, color = countriesAndTerritories))+
-  labs(title = &quot; Covid-19 confirmed cases worldwide&quot;,
+<h3><span class="header-section-number">4.1.3</span> Plot the Cumulative Cases in year 2020</h3>
+<pre class="r"><code>covid_data_by_month_tbl%&gt;%
+  ggplot(aes(x = date, y = total_cases, color = countriesAndTerritories)) +
+  geom_smooth(method = &quot;gam&quot;, se = FALSE) +
+  scale_color_manual(values=c(&quot;#000000&quot;, &quot;#ff0016&quot;, &quot;#3ea6d7&quot;, &quot;#feff00&quot;, &quot;#106a00&quot;, &quot;#ff8e02&quot;))+
+  labs(title = &quot;Confirmed covid cases worldwide&quot;,
        x = &quot;Year 2020&quot;,
-       y = &quot;Cumulative Cases&quot;
-       )</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-28-1.png" width="672" /> ### Challenge : Visualize distribution of mortality rate</p>
+       y = &quot;Cases&quot;)</code></pre>
+<p><img src="journal_files/figure-html/unnamed-chunk-27-1.png" width="672" /> ### Challenge : Visualize distribution of mortality rate</p>
 <pre class="r"><code>world &lt;- map_data(&quot;world&quot;)
 
 covid_by_mortality_tbl &lt;- covid_data_tbl %&gt;%
@@ -1049,7 +1044,7 @@ covid_by_map_tbl &lt;- merge(x = world, y = covid_by_mortality_tbl,
                           all.y = FALSE)
 
 toc()</code></pre>
-<pre><code>## 0.22 sec elapsed</code></pre>
+<pre><code>## 0.09 sec elapsed</code></pre>
 <pre class="r"><code>covid_by_map_tbl%&gt;% glimpse()</code></pre>
 <pre><code>## Rows: 99,338
 ## Columns: 7
@@ -1071,7 +1066,7 @@ covid_by_map_tbl%&gt;%
   scale_fill_continuous(labels = scales::percent)+
   labs(title = &quot;Confirmed Covid19 deaths relative to size of the population &quot;,
        subtitle = &quot;More than 1.2 Million confirmed covid19 deaths worldwide&quot;)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<p><img src="journal_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
 </div>
 </div>
 </div>
