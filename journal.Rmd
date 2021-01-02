@@ -353,9 +353,9 @@ covid_by_mortality_tbl <- covid_data_tbl %>%
     TRUE ~ countriesAndTerritories
     
   ))%>%
-  group_by(countriesAndTerritories, popData2019, deaths_weekly) %>%
+  group_by(countriesAndTerritories, popData2019, deaths) %>%
   summarise(total_pop = max(popData2019))%>%
-  summarise(total_death = sum(deaths_weekly))%>%
+  summarise(total_death = sum(deaths))%>%
   summarise(mortality =  (total_death)/(popData2019))
 
 class(covid_by_mortality_tbl)
