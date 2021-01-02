@@ -384,7 +384,7 @@ covid_by_map_tbl%>%
   geom_map(aes(x = long, y = lat, map_id = region, fill = mortality),map = world) +
   scale_fill_continuous(labels = scales::percent, low = "white", high="red")+
   labs(title = "Confirmed Covid19 deaths relative to size of the population ",
-       subtitle = "More than 1.2 Million confirmed covid19 deaths worldwide")
+       subtitle = "More than 1.82 Million confirmed covid19 deaths worldwide")
 ```
 
 
