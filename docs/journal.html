@@ -578,7 +578,7 @@ sales_by_loc_tbl %&gt;%
   write_rds(&quot;C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/02_wrangled_data/sales_by_loc_tbl.rds&quot;)</code></pre>
 </div>
 <div id="analyzing-the-sales-by-location-and-year-facet_wrap" class="section level2">
-<h2><span class="header-section-number">1.8</span> 1.2 Analyzing the sales by location and year (facet_wrap)</h2>
+<h2><span class="header-section-number">1.8</span> Analyzing the sales by location and year (facet_wrap)</h2>
 <div id="importing-additional-library" class="section level3">
 <h3><span class="header-section-number">1.8.1</span> Importing additional library</h3>
 </div>
@@ -588,8 +588,8 @@ sales_by_loc_tbl %&gt;%
   left_join(bikes_tbl, by = c(&quot;product.id&quot; = &quot;bike.id&quot;)) %&gt;%
   left_join(bikeshops_tbl, by = c(&quot;customer.id&quot; = &quot;bikeshop.id&quot;))</code></pre>
 </div>
-<div id="split-location-city-state-and-calcuate-total-price" class="section level3">
-<h3><span class="header-section-number">1.8.3</span> Split Location (City &amp; State) and Calcuate Total Price</h3>
+<div id="split-location-city-state-and-calculate-total-price" class="section level3">
+<h3><span class="header-section-number">1.8.3</span> Split Location (City &amp; State) and Calculate Total Price</h3>
 <pre class="r"><code>bike_summary_wrangled_tbl &lt;- bike_summary_tbl %&gt;%
 separate(col = location,
          into = c(&quot;city&quot;, &quot;state&quot;),
@@ -642,14 +642,20 @@ sales_by_year_state_tbl</code></pre>
                                                     decimal.mark = &quot;,&quot;,
                                                     prefix = &quot;&quot;,
                                                     suffix = &quot; €&quot;)) </code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-14-1.png" width="672" /> # Data Acquisition ## API ### Importing Libraries</p>
+<p><img src="journal_files/figure-html/unnamed-chunk-14-1.png" width="672" /> # Data Acquisition</p>
 </div>
-<div id="importing-data" class="section level3">
-<h3><span class="header-section-number">1.8.7</span> Importing data</h3>
+</div>
+</div>
+<div id="api" class="section level1">
+<h1><span class="header-section-number">2</span> API</h1>
+<div id="importing-libraries" class="section level2">
+<h2><span class="header-section-number">2.1</span> Importing Libraries</h2>
+</div>
+<div id="importing-data" class="section level2">
+<h2><span class="header-section-number">2.2</span> Importing data</h2>
 <pre class="r"><code>fun_trivia &lt;- GET(&#39;https://opentdb.com/api.php?amount=10&#39;)</code></pre>
-</div>
 <div id="exporting-to-a-tibble" class="section level3">
-<h3><span class="header-section-number">1.8.8</span> Exporting to a Tibble</h3>
+<h3><span class="header-section-number">2.2.1</span> Exporting to a Tibble</h3>
 <pre class="r"><code>fun_trivia %&gt;%
   .$content %&gt;%
   rawToChar() %&gt;%
@@ -673,20 +679,20 @@ sales_by_year_state_tbl</code></pre>
 </div>
 </div>
 <div id="data-acquisition" class="section level1">
-<h1><span class="header-section-number">2</span> Data Acquisition</h1>
+<h1><span class="header-section-number">3</span> Data Acquisition</h1>
 <div id="scraping-data-from-competitor-website" class="section level2">
-<h2><span class="header-section-number">2.1</span> Scraping data from competitor Website</h2>
-<div id="importing-libraries" class="section level3">
-<h3><span class="header-section-number">2.1.1</span> Importing Libraries</h3>
+<h2><span class="header-section-number">3.1</span> Scraping data from competitor Website</h2>
+<div id="importing-libraries-1" class="section level3">
+<h3><span class="header-section-number">3.1.1</span> Importing Libraries</h3>
 </div>
 <div id="extracting-data-from-rosebikes-website" class="section level3">
-<h3><span class="header-section-number">2.1.2</span> Extracting Data from Rosebikes Website</h3>
+<h3><span class="header-section-number">3.1.2</span> Extracting Data from Rosebikes Website</h3>
 <pre class="r"><code>url  &lt;- &quot;https://www.rosebikes.de/fahrr%C3%A4der/mtb&quot;
 rose_html &lt;- url %&gt;% 
   read_html()</code></pre>
 </div>
 <div id="bike-names" class="section level3">
-<h3><span class="header-section-number">2.1.3</span> Bike Names</h3>
+<h3><span class="header-section-number">3.1.3</span> Bike Names</h3>
 <pre class="r"><code>rose_bike_names &lt;-  rose_html %&gt;% 
   html_nodes(css = &quot;.catalog-category-bikes__title-text&quot;) %&gt;% 
   html_text() %&gt;% 
@@ -706,7 +712,7 @@ rose_bike_names</code></pre>
 ## 8 FIRE</code></pre>
 </div>
 <div id="bike-cost" class="section level3">
-<h3><span class="header-section-number">2.1.4</span> Bike Cost</h3>
+<h3><span class="header-section-number">3.1.4</span> Bike Cost</h3>
 <pre class="r"><code>rose_bike_cost &lt;-  rose_html %&gt;% 
   html_nodes(css = &quot;.catalog-category-bikes__price-title&quot;) %&gt;% 
   html_text() %&gt;% 
@@ -726,7 +732,7 @@ rose_bike_cost</code></pre>
 ## 8 2.149,00 €</code></pre>
 </div>
 <div id="bike-description" class="section level3">
-<h3><span class="header-section-number">2.1.5</span> Bike Description</h3>
+<h3><span class="header-section-number">3.1.5</span> Bike Description</h3>
 <pre class="r"><code>rose_bike_description &lt;-  rose_html %&gt;% 
   html_nodes(css = &quot;.catalog-category-bikes__subtitle&quot;) %&gt;% 
   html_text() %&gt;% 
@@ -746,7 +752,7 @@ rose_bike_description</code></pre>
 ## 8 Drop in die Welt des Freeride Mountainbikings</code></pre>
 </div>
 <div id="display-details-in-a-tabular-format" class="section level3">
-<h3><span class="header-section-number">2.1.6</span> Display details in a Tabular format</h3>
+<h3><span class="header-section-number">3.1.6</span> Display details in a Tabular format</h3>
 <pre class="r"><code>tibble(Bike_Model = rose_bike_names, Bike_cost = rose_bike_cost, Description = rose_bike_description)</code></pre>
 <pre><code>## # A tibble: 8 x 3
 ##   Bike_Model$value Bike_cost$value Description$value                            
@@ -763,12 +769,12 @@ rose_bike_description</code></pre>
 </div>
 </div>
 <div id="data-wrangling" class="section level1">
-<h1><span class="header-section-number">3</span> Data Wrangling</h1>
+<h1><span class="header-section-number">4</span> Data Wrangling</h1>
 <div id="importing-headers" class="section level2">
-<h2><span class="header-section-number">3.1</span> Importing headers</h2>
+<h2><span class="header-section-number">4.1</span> Importing headers</h2>
 </div>
 <div id="importing-data-1" class="section level2">
-<h2><span class="header-section-number">3.2</span> Importing Data</h2>
+<h2><span class="header-section-number">4.2</span> Importing Data</h2>
 <pre class="r"><code>assignee_col_types &lt;- list(
   id = col_character(),
   type = col_integer(),
@@ -869,7 +875,7 @@ key(patent_assignee_merged_tbl)</code></pre>
 <pre class="r"><code>setorderv(patent_assignee_merged_tbl, c(&quot;type&quot;, &quot;organization&quot;))</code></pre>
 </div>
 <div id="patent-domination-by-companies-in-usa" class="section level2">
-<h2><span class="header-section-number">3.3</span> Patent Domination by Companies in USA</h2>
+<h2><span class="header-section-number">4.3</span> Patent Domination by Companies in USA</h2>
 <pre class="r"><code>patent_assignee_merge_tbl_usa &lt;- patent_assignee_merged_tbl[ (type == 2)]
 patent_assignee_merge_tbl_usa</code></pre>
 <pre><code>##                       assignee_id patent_id type
@@ -920,7 +926,7 @@ as_tibble(most_patents_usa, .rows = 10)</code></pre>
 ## 10 Apple Inc.                                   21821</code></pre>
 </div>
 <div id="company-with-highest-patent-granted-in-2019" class="section level2">
-<h2><span class="header-section-number">3.4</span> Company with highest patent granted in 2019</h2>
+<h2><span class="header-section-number">4.4</span> Company with highest patent granted in 2019</h2>
 <pre class="r"><code>col_types_patent &lt;- list(
   id = col_character(),
   date = col_date(&quot;%Y-%m-%d&quot;),
@@ -1024,8 +1030,8 @@ as_tibble(task_2_ans, .rows = 10)</code></pre>
 ##  9 Duke University                                   188 2019-12-03
 ## 10 Genentech, Inc.                                   184 2019-03-12</code></pre>
 </div>
-<div id="innovation-in-tech-top-10-companies-worldwide" class="section level2">
-<h2><span class="header-section-number">3.5</span> Innovation in Tech : Top 10 companies worldwide</h2>
+<div id="innovation-in-tech" class="section level2">
+<h2><span class="header-section-number">4.5</span> Innovation in Tech</h2>
 <pre class="r"><code>col_types_uspc &lt;- list(
   patent_id = col_character(),
   mainclass_id = col_character(),
@@ -1056,13 +1062,25 @@ uspc_tbl</code></pre>
 ## 18056784:   7919384          257        2
 ## 18056785:   5017484          435        3
 ## 18056786:   5447315          273        4</code></pre>
+<div id="most-innovative-tech-sector-by-mainclass_id" class="section level3">
+<h3><span class="header-section-number">4.5.1</span> Most Innovative Tech Sector (by mainclass_ID)</h3>
+<pre class="r"><code>setkey(uspc_tbl, &quot;mainclass_id&quot;)
+key(uspc_tbl)</code></pre>
+<pre><code>## [1] &quot;mainclass_id&quot;</code></pre>
+<pre class="r"><code>sorted &lt;- uspc_tbl[,.N, by = list(mainclass_id)]
+most_innovative_tech_sector &lt;- sorted[, mainclass_id[N == max(N)]]
+most_innovative_tech_sector</code></pre>
+<pre><code>## [1] &quot;257&quot;</code></pre>
+</div>
+<div id="top-10-companies-with-most-patents-worldwide" class="section level3">
+<h3><span class="header-section-number">4.5.2</span> Top 10 companies with most Patents worldwide</h3>
 <pre class="r"><code>tic()
 patent_assignee_merged_uspc_tbl &lt;- merge(x = patent_assignee_merged_tbl, y = uspc_tbl,
                                            by = &quot;patent_id&quot;,
                                            all.x = TRUE,  
                                            all.y = TRUE)
 toc()</code></pre>
-<pre><code>## 115.3 sec elapsed</code></pre>
+<pre><code>## 124.48 sec elapsed</code></pre>
 <pre class="r"><code>setkey(patent_assignee_merged_uspc_tbl, &quot;type&quot;)
 key(patent_assignee_merged_tbl)</code></pre>
 <pre><code>## [1] &quot;type&quot;</code></pre>
@@ -1074,14 +1092,13 @@ patent_assignee_merged_tbl_us &lt;- patent_assignee_merged_tbl[ (type == 2)|(typ
 tic()
 most_patents_world &lt;- patent_assignee_merged_tbl_us[!is.na(organization), .N, by = organization]
 toc()</code></pre>
-<pre><code>## 8.05 sec elapsed</code></pre>
+<pre><code>## 1.08 sec elapsed</code></pre>
 <pre class="r"><code>setkey(most_patents_world, &quot;organization&quot;)
 key(most_patents_world)</code></pre>
 <pre><code>## [1] &quot;organization&quot;</code></pre>
-<pre class="r"><code>setorderv(most_patents_world, c(&quot;N&quot;, &quot;organization&quot;), order = -1)</code></pre>
-<div id="top-10-companies-with-most-patents-worldwide" class="section level3">
-<h3><span class="header-section-number">3.5.1</span> Top 10 companies with most Patents worldwide</h3>
-<pre class="r"><code>as_tibble(most_patents_world, .rows = 10)</code></pre>
+<pre class="r"><code>setorderv(most_patents_world, c(&quot;N&quot;, &quot;organization&quot;), order = -1)
+
+as_tibble(most_patents_world, .rows = 10)</code></pre>
 <pre><code>## # A tibble: 10 x 2
 ##    organization                                     N
 ##    &lt;chr&gt;                                        &lt;int&gt;
@@ -1096,9 +1113,8 @@ key(most_patents_world)</code></pre>
 ##  9 Fujitsu Limited                              37197
 ## 10 Hewlett-Packard Development Company, L.P.    35573</code></pre>
 </div>
-</div>
-<div id="top-5-tech-main-classes" class="section level2">
-<h2><span class="header-section-number">3.6</span> Top 5 Tech Main Classes</h2>
+<div id="top-5-tech-main-classes" class="section level3">
+<h3><span class="header-section-number">4.5.3</span> Top 5 Tech Main Classes</h3>
 <pre class="r"><code>setkey(patent_assignee_merged_uspc_tbl, &quot;mainclass_id&quot;)
 key(patent_assignee_merged_uspc_tbl)</code></pre>
 <pre><code>## [1] &quot;mainclass_id&quot;</code></pre>
@@ -1137,7 +1153,7 @@ patent_assignee_merged_uspc_tbl_world &lt;- patent_assignee_merged_uspc_tbl_worl
 tic()
 top_patent_class &lt;- patent_assignee_merged_uspc_tbl_world[!is.na(mainclass_id), .N, by = mainclass_id]
 toc()</code></pre>
-<pre><code>## 0.09 sec elapsed</code></pre>
+<pre><code>## 0.25 sec elapsed</code></pre>
 <pre class="r"><code>top_patent_class</code></pre>
 <pre><code>##      mainclass_id   N
 ##   1:          01J   1
@@ -1166,16 +1182,17 @@ as_tibble(top_patent_class, .rows = 5)</code></pre>
 ## 5 358          36227</code></pre>
 </div>
 </div>
+</div>
 <div id="data-visualization" class="section level1">
-<h1><span class="header-section-number">4</span> Data Visualization</h1>
+<h1><span class="header-section-number">5</span> Data Visualization</h1>
 <div id="challenge-cumulative-covid-plot" class="section level2">
-<h2><span class="header-section-number">4.1</span> Challenge : Cumulative Covid Plot</h2>
+<h2><span class="header-section-number">5.1</span> Challenge : Cumulative Covid Plot</h2>
 <div id="import-covid-data" class="section level3">
-<h3><span class="header-section-number">4.1.1</span> Import Covid Data</h3>
+<h3><span class="header-section-number">5.1.1</span> Import Covid Data</h3>
 <pre class="r"><code>covid_data_tbl &lt;- read_csv(&quot;https://opendata.ecdc.europa.eu/covid19/casedistribution/csv&quot;)</code></pre>
 </div>
 <div id="filter-with-countries-month" class="section level3">
-<h3><span class="header-section-number">4.1.2</span> Filter with countries &amp; month</h3>
+<h3><span class="header-section-number">5.1.2</span> Filter with countries &amp; month</h3>
 <pre class="r"><code>covid_data_by_month_tbl &lt;- covid_data_tbl %&gt;% map_df(rev) %&gt;%
   #select(cases, countriesAndTerritories, dateRep) %&gt;%
   select(cases_weekly, countriesAndTerritories, dateRep) %&gt;%
@@ -1189,7 +1206,7 @@ as_tibble(top_patent_class, .rows = 5)</code></pre>
   mutate(total_cases = cumsum(cases_weekly))# %&gt;%</code></pre>
 </div>
 <div id="plot-the-cumulative-cases-in-year-2020" class="section level3">
-<h3><span class="header-section-number">4.1.3</span> Plot the Cumulative Cases in year 2020</h3>
+<h3><span class="header-section-number">5.1.3</span> Plot the Cumulative Cases in year 2020</h3>
 <pre class="r"><code>covid_data_by_month_tbl%&gt;%
   ggplot(aes(x = date, y = total_cases, color = countriesAndTerritories)) +
   geom_smooth(method = &quot;gam&quot;, se = FALSE) +
@@ -1197,7 +1214,7 @@ as_tibble(top_patent_class, .rows = 5)</code></pre>
   labs(title = &quot;Confirmed covid cases worldwide&quot;,
        x = &quot;Year 2020&quot;,
        y = &quot;Cases&quot;)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-36-1.png" width="672" /> ### Challenge : Visualize distribution of mortality rate</p>
+<p><img src="journal_files/figure-html/unnamed-chunk-37-1.png" width="672" /> ### Challenge : Visualize distribution of mortality rate</p>
 <pre class="r"><code>world &lt;- map_data(&quot;world&quot;)
 
 covid_by_mortality_tbl &lt;- covid_data_tbl %&gt;%
@@ -1244,7 +1261,7 @@ covid_by_map_tbl &lt;- merge(x = world, y = covid_by_mortality_tbl,
                           all.y = FALSE)
 
 toc()</code></pre>
-<pre><code>## 0.03 sec elapsed</code></pre>
+<pre><code>## 0.05 sec elapsed</code></pre>
 <pre class="r"><code>covid_by_map_tbl%&gt;% glimpse()</code></pre>
 <pre><code>## Rows: 99,338
 ## Columns: 7
@@ -1266,7 +1283,7 @@ covid_by_map_tbl%&gt;%
   scale_fill_continuous(labels = scales::percent, low = &quot;white&quot;, high=&quot;red&quot;)+
   labs(title = &quot;Confirmed Covid19 deaths relative to size of the population &quot;,
        subtitle = &quot;More than 1.83 Million confirmed covid19 deaths worldwide&quot;)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<p><img src="journal_files/figure-html/unnamed-chunk-38-1.png" width="672" /></p>
 </div>
 </div>
 </div>

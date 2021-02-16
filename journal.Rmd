@@ -102,7 +102,7 @@ sales_by_loc_tbl %>%
 sales_by_loc_tbl %>% 
   write_rds("C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/02_wrangled_data/sales_by_loc_tbl.rds")
 ```
-## 1.2 Analyzing the sales by location and year (facet_wrap)
+## Analyzing the sales by location and year (facet_wrap)
 ### Importing additional library
 ```{r, include = FALSE}
 library(lubridate)
@@ -113,7 +113,7 @@ bike_summary_tbl <- orderlines_tbl %>%
   left_join(bikes_tbl, by = c("product.id" = "bike.id")) %>%
   left_join(bikeshops_tbl, by = c("customer.id" = "bikeshop.id"))
 ```
-### Split Location (City & State) and Calcuate Total Price 
+### Split Location (City & State) and Calculate Total Price 
 ```{r}
 bike_summary_wrangled_tbl <- bike_summary_tbl %>%
 separate(col = location,
@@ -155,14 +155,15 @@ sales_by_year_state_tbl %>%
                                                     suffix = " €")) 
 ```
 # Data Acquisition
-## API
-### Importing Libraries
+
+# API
+## Importing Libraries
 ```{r,include = FALSE}
 library(tidyverse)
 library(httr)
 library(jsonlite)
 ```
-### Importing data 
+## Importing data 
 ```{r}
 fun_trivia <- GET('https://opentdb.com/api.php?amount=10')
 ```
@@ -354,7 +355,7 @@ task_2_ans <- highest_patent_year_2019 %>%
 as_tibble(task_2_ans, .rows = 10)
 ```
 
-## Innovation in Tech : Top 10 companies worldwide 
+## Innovation in Tech 
 ```{r}
 
 col_types_uspc <- list(
@@ -375,7 +376,17 @@ uspc_tbl <- vroom(
 
 setDT(uspc_tbl)
 uspc_tbl
-
+```
+### Most Innovative Tech Sector (by mainclass_ID)
+```{r}
+setkey(uspc_tbl, "mainclass_id")
+key(uspc_tbl)
+sorted <- uspc_tbl[,.N, by = list(mainclass_id)]
+most_innovative_tech_sector <- sorted[, mainclass_id[N == max(N)]]
+most_innovative_tech_sector
+```
+### Top 10 companies with most Patents worldwide 
+```{r}
 tic()
 patent_assignee_merged_uspc_tbl <- merge(x = patent_assignee_merged_tbl, y = uspc_tbl,
                                            by = "patent_id",
@@ -397,12 +408,10 @@ toc()
 setkey(most_patents_world, "organization")
 key(most_patents_world)
 setorderv(most_patents_world, c("N", "organization"), order = -1)
-```
-### Top 10 companies with most Patents worldwide 
-```{r}
+
 as_tibble(most_patents_world, .rows = 10)
 ```
-## Top 5 Tech Main Classes  
+### Top 5 Tech Main Classes  
 ```{r}
 setkey(patent_assignee_merged_uspc_tbl, "mainclass_id")
 key(patent_assignee_merged_uspc_tbl)
