@@ -555,6 +555,7 @@ sales_by_loc_tbl</code></pre>
   geom_col(fill = &quot;#2DC6D6&quot;) + # Use geom_col for a bar plot
   geom_label(aes(label = Total_sales_in_Euro)) + # Adding labels to the bars
   geom_smooth(method = &quot;lm&quot;, se = FALSE) + # Adding a trendline
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   
   scale_y_continuous(labels = scales::dollar_format(big.mark = &quot;.&quot;, 
                                                     decimal.mark = &quot;,&quot;, 
@@ -576,20 +577,79 @@ sales_by_loc_tbl %&gt;%
 sales_by_loc_tbl %&gt;% 
   write_rds(&quot;C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/02_wrangled_data/sales_by_loc_tbl.rds&quot;)</code></pre>
 </div>
+<div id="analyzing-the-sales-by-location-and-year-facet_wrap" class="section level2">
+<h2><span class="header-section-number">1.8</span> 1.2 Analyzing the sales by location and year (facet_wrap)</h2>
+<div id="importing-additional-library" class="section level3">
+<h3><span class="header-section-number">1.8.1</span> Importing additional library</h3>
 </div>
-<div id="data-acquisition" class="section level1">
-<h1><span class="header-section-number">2</span> Data Acquisition</h1>
-<div id="api" class="section level2">
-<h2><span class="header-section-number">2.1</span> API</h2>
-<div id="importing-libraries" class="section level3">
-<h3><span class="header-section-number">2.1.1</span> Importing Libraries</h3>
+<div id="combine-data" class="section level3">
+<h3><span class="header-section-number">1.8.2</span> Combine Data</h3>
+<pre class="r"><code>bike_summary_tbl &lt;- orderlines_tbl %&gt;%
+  left_join(bikes_tbl, by = c(&quot;product.id&quot; = &quot;bike.id&quot;)) %&gt;%
+  left_join(bikeshops_tbl, by = c(&quot;customer.id&quot; = &quot;bikeshop.id&quot;))</code></pre>
+</div>
+<div id="split-location-city-state-and-calcuate-total-price" class="section level3">
+<h3><span class="header-section-number">1.8.3</span> Split Location (City &amp; State) and Calcuate Total Price</h3>
+<pre class="r"><code>bike_summary_wrangled_tbl &lt;- bike_summary_tbl %&gt;%
+separate(col = location,
+         into = c(&quot;city&quot;, &quot;state&quot;),
+         sep = &quot;, &quot;,
+         convert = T) %&gt;% 
+mutate(total.price = price * quantity)</code></pre>
+</div>
+<div id="simplify-the-table" class="section level3">
+<h3><span class="header-section-number">1.8.4</span> Simplify the Table</h3>
+<pre class="r"><code>bike_summary_wrangled_tbl &lt;- bike_summary_wrangled_tbl %&gt;%
+  select(...1, order.id, order.date, customer.id, quantity, price, state, total.price)</code></pre>
+</div>
+<div id="sales-by-state-per-year" class="section level3">
+<h3><span class="header-section-number">1.8.5</span> Sales by state per Year</h3>
+<pre class="r"><code>sales_by_year_state_tbl &lt;- bike_summary_wrangled_tbl %&gt;%
+  select(order.date, total.price, state) %&gt;%
+  mutate(year = year(order.date)) %&gt;%
+  group_by(year, state) %&gt;%
+  summarise(sales = sum(total.price)) %&gt;%
+  ungroup() %&gt;%
+  mutate(sales_text = scales::dollar(sales, big.mark = &quot;.&quot;,
+                                     decimal.mark = &quot;,&quot;,
+                                     prefix = &quot;&quot;,
+                                     suffix = &quot; €&quot;))
+sales_by_year_state_tbl</code></pre>
+<pre><code>## # A tibble: 60 x 4
+##     year state                           sales sales_text 
+##    &lt;dbl&gt; &lt;chr&gt;                           &lt;dbl&gt; &lt;chr&gt;      
+##  1  2015 Baden-Württemberg             1031924 1.031.924 €
+##  2  2015 Bavaria                       1301461 1.301.461 €
+##  3  2015 Berlin                          95853 95.853 €   
+##  4  2015 Bremen                        1395912 1.395.912 €
+##  5  2015 Hamburg                        423090 423.090 €  
+##  6  2015 Hesse                          308609 308.609 €  
+##  7  2015 Lower Saxony                   584386 584.386 €  
+##  8  2015 Mecklenburg-Western Pomerania  222003 222.003 €  
+##  9  2015 North Rhine-Westphalia        3735092 3.735.092 €
+## 10  2015 Saxony                         238371 238.371 €  
+## # ... with 50 more rows</code></pre>
+</div>
+<div id="plotting-the-data" class="section level3">
+<h3><span class="header-section-number">1.8.6</span> Plotting the data</h3>
+<pre class="r"><code>sales_by_year_state_tbl %&gt;%
+  ggplot(aes(x = year, y = sales, fill = state)) +
+  geom_col() + 
+  facet_wrap(~ state) +
+  geom_smooth(method = &quot;lm&quot;, se = FALSE) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(labels = scales::dollar_format(big.mark = &quot;.&quot;,
+                                                    decimal.mark = &quot;,&quot;,
+                                                    prefix = &quot;&quot;,
+                                                    suffix = &quot; €&quot;)) </code></pre>
+<p><img src="journal_files/figure-html/unnamed-chunk-14-1.png" width="672" /> # Data Acquisition ## API ### Importing Libraries</p>
 </div>
 <div id="importing-data" class="section level3">
-<h3><span class="header-section-number">2.1.2</span> Importing data</h3>
+<h3><span class="header-section-number">1.8.7</span> Importing data</h3>
 <pre class="r"><code>fun_trivia &lt;- GET(&#39;https://opentdb.com/api.php?amount=10&#39;)</code></pre>
 </div>
 <div id="exporting-to-a-tibble" class="section level3">
-<h3><span class="header-section-number">2.1.3</span> Exporting to a Tibble</h3>
+<h3><span class="header-section-number">1.8.8</span> Exporting to a Tibble</h3>
 <pre class="r"><code>fun_trivia %&gt;%
   .$content %&gt;%
   rawToChar() %&gt;%
@@ -598,108 +658,107 @@ sales_by_loc_tbl %&gt;%
 <pre><code>## # A tibble: 10 x 2
 ##    response_code results$category $type $difficulty $question $correct_answer
 ##            &lt;int&gt; &lt;chr&gt;            &lt;chr&gt; &lt;chr&gt;       &lt;chr&gt;     &lt;chr&gt;          
-##  1             0 Science: Comput~ mult~ easy        In any p~ &amp;#039;For&amp;#039~
-##  2             0 History          mult~ medium      Which di~ Mao Zedong     
-##  3             0 History          mult~ hard        On which~ October 27, 19~
-##  4             0 General Knowled~ mult~ hard        What is ~ Feiji          
-##  5             0 Geography        mult~ hard        What is ~ Kaunas         
-##  6             0 Entertainment: ~ mult~ medium      What is ~ Earth-199999   
-##  7             0 General Knowled~ mult~ medium      What is ~ A flag         
-##  8             0 Entertainment: ~ mult~ hard        What pro~ Java           
-##  9             0 Animals          mult~ medium      What is ~ Pan troglodytes
-## 10             0 General Knowled~ mult~ medium      Which co~ Belgium        
+##  1             0 History          mult~ easy        &quot;How man~ 6              
+##  2             0 Entertainment: ~ bool~ easy        &quot;The mov~ True           
+##  3             0 Entertainment: ~ mult~ medium      &quot;In whic~ Germany        
+##  4             0 Politics         bool~ easy        &quot;There w~ True           
+##  5             0 Sports           mult~ easy        &quot;In base~ 0              
+##  6             0 Entertainment: ~ bool~ easy        &quot;In Kill~ False          
+##  7             0 Entertainment: ~ mult~ hard        &quot;Which K~ Dream Drop Dis~
+##  8             0 Geography        mult~ medium      &quot;What is~ Indonesia      
+##  9             0 Entertainment: ~ mult~ hard        &quot;Which g~ Dark Souls III 
+## 10             0 Science: Comput~ mult~ medium      &quot;The tea~ Utah Teapot    
 ## # ... with 1 more variable: $incorrect_answers &lt;list&gt;</code></pre>
 </div>
 </div>
+</div>
+<div id="data-acquisition" class="section level1">
+<h1><span class="header-section-number">2</span> Data Acquisition</h1>
 <div id="scraping-data-from-competitor-website" class="section level2">
-<h2><span class="header-section-number">2.2</span> Scraping data from competitor Website</h2>
-<div id="importing-libraries-1" class="section level3">
-<h3><span class="header-section-number">2.2.1</span> Importing Libraries</h3>
+<h2><span class="header-section-number">2.1</span> Scraping data from competitor Website</h2>
+<div id="importing-libraries" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Importing Libraries</h3>
 </div>
 <div id="extracting-data-from-rosebikes-website" class="section level3">
-<h3><span class="header-section-number">2.2.2</span> Extracting Data from Rosebikes Website</h3>
+<h3><span class="header-section-number">2.1.2</span> Extracting Data from Rosebikes Website</h3>
 <pre class="r"><code>url  &lt;- &quot;https://www.rosebikes.de/fahrr%C3%A4der/mtb&quot;
 rose_html &lt;- url %&gt;% 
   read_html()</code></pre>
 </div>
 <div id="bike-names" class="section level3">
-<h3><span class="header-section-number">2.2.3</span> Bike Names</h3>
+<h3><span class="header-section-number">2.1.3</span> Bike Names</h3>
 <pre class="r"><code>rose_bike_names &lt;-  rose_html %&gt;% 
   html_nodes(css = &quot;.catalog-category-bikes__title-text&quot;) %&gt;% 
   html_text() %&gt;% 
   str_extract(&quot;(?&lt;= ).*(?=)&quot;) %&gt;%
   as_tibble()
 rose_bike_names</code></pre>
-<pre><code>## # A tibble: 9 x 1
+<pre><code>## # A tibble: 8 x 1
 ##   value     
 ##   &lt;chr&gt;     
-## 1 CONTROL   
-## 2 MILLER    
-## 3 PEAK      
-## 4 BRUCE     
-## 5 SOLO      
-## 6 PATH      
-## 7 HILL      
-## 8 HILL TRAIL
-## 9 FIRE</code></pre>
+## 1 BRUCE     
+## 2 CONTROL   
+## 3 MILLER    
+## 4 SOLO      
+## 5 PATH      
+## 6 HILL      
+## 7 HILL TRAIL
+## 8 FIRE</code></pre>
 </div>
 <div id="bike-cost" class="section level3">
-<h3><span class="header-section-number">2.2.4</span> Bike Cost</h3>
+<h3><span class="header-section-number">2.1.4</span> Bike Cost</h3>
 <pre class="r"><code>rose_bike_cost &lt;-  rose_html %&gt;% 
   html_nodes(css = &quot;.catalog-category-bikes__price-title&quot;) %&gt;% 
   html_text() %&gt;% 
   str_extract(&quot;(?&lt;= ).*(?=)&quot;) %&gt;%
   as_tibble()
 rose_bike_cost</code></pre>
-<pre><code>## # A tibble: 9 x 1
+<pre><code>## # A tibble: 8 x 1
 ##   value     
 ##   &lt;chr&gt;     
-## 1 1.699,00 €
-## 2 1.999,00 €
-## 3 3.099,00 €
-## 4 &lt;NA&gt;      
-## 5 &lt;NA&gt;      
-## 6 1.849,00 €
-## 7 2.599,00 €
-## 8 2.899,00 €
-## 9 2.149,00 €</code></pre>
+## 1 899,00 €  
+## 2 1.699,00 €
+## 3 1.999,00 €
+## 4 699,00 €  
+## 5 1.849,00 €
+## 6 2.599,00 €
+## 7 2.899,00 €
+## 8 2.149,00 €</code></pre>
 </div>
 <div id="bike-description" class="section level3">
-<h3><span class="header-section-number">2.2.5</span> Bike Description</h3>
+<h3><span class="header-section-number">2.1.5</span> Bike Description</h3>
 <pre class="r"><code>rose_bike_description &lt;-  rose_html %&gt;% 
   html_nodes(css = &quot;.catalog-category-bikes__subtitle&quot;) %&gt;% 
   html_text() %&gt;% 
   str_extract(&quot;(?&lt;= ).*(?=)&quot;) %&gt;%
   as_tibble()
 rose_bike_description</code></pre>
-<pre><code>## # A tibble: 9 x 1
+<pre><code>## # A tibble: 8 x 1
 ##   value                                                          
 ##   &lt;chr&gt;                                                          
-## 1 vielseitige Allrounder für Tour- und Trailspaß                 
-## 2 für heftige Lines in technischem Gelände                       
-## 3 Carbon-Trailbike mit Abfahrtsgenen                             
-## 4 Wanted Dirtbike                                                
-## 5 Topseller-Hardtail für Gelände und Alltag                      
-## 6 leichte Carbon-Hardtail für Highspeed im Gelände               
-## 7 vollgefedertes Carbon-Racebike für anspruchsvolle Strecken     
-## 8 Trail-Variante – Mehr Federweg für das schnelle Carbon-Racebike
-## 9 Drop in die Welt des Freeride Mountainbikings</code></pre>
+## 1 Wanted Dirtbike                                                
+## 2 vielseitige Allrounder für Tour- und Trailspaß                 
+## 3 für heftige Lines in technischem Gelände                       
+## 4 Topseller-Hardtail für Gelände und Alltag                      
+## 5 leichte Carbon-Hardtail für Highspeed im Gelände               
+## 6 vollgefedertes Carbon-Racebike für anspruchsvolle Strecken     
+## 7 Trail-Variante – Mehr Federweg für das schnelle Carbon-Racebike
+## 8 Drop in die Welt des Freeride Mountainbikings</code></pre>
 </div>
 <div id="display-details-in-a-tabular-format" class="section level3">
-<h3><span class="header-section-number">2.2.6</span> Display details in a Tabular format</h3>
+<h3><span class="header-section-number">2.1.6</span> Display details in a Tabular format</h3>
 <pre class="r"><code>tibble(Bike_Model = rose_bike_names, Bike_cost = rose_bike_cost, Description = rose_bike_description)</code></pre>
-<pre><code>## # A tibble: 9 x 3
+<pre><code>## # A tibble: 8 x 3
 ##   Bike_Model$value Bike_cost$value Description$value                            
 ##   &lt;chr&gt;            &lt;chr&gt;           &lt;chr&gt;                                        
-## 1 CONTROL          1.699,00 €      vielseitige Allrounder für Tour- und Trailsp~
-## 2 MILLER           1.999,00 €      für heftige Lines in technischem Gelände     
-## 3 PEAK             3.099,00 €      Carbon-Trailbike mit Abfahrtsgenen           
-## 4 BRUCE            &lt;NA&gt;            Wanted Dirtbike                              
-## 5 SOLO             &lt;NA&gt;            Topseller-Hardtail für Gelände und Alltag    
-## 6 PATH             1.849,00 €      leichte Carbon-Hardtail für Highspeed im Gel~
-## 7 HILL             2.599,00 €      vollgefedertes Carbon-Racebike für anspruchs~
-## 8 HILL TRAIL       2.899,00 €      Trail-Variante – Mehr Federweg für das schne~
-## 9 FIRE             2.149,00 €      Drop in die Welt des Freeride Mountainbikings</code></pre>
+## 1 BRUCE            899,00 €        Wanted Dirtbike                              
+## 2 CONTROL          1.699,00 €      vielseitige Allrounder für Tour- und Trailsp~
+## 3 MILLER           1.999,00 €      für heftige Lines in technischem Gelände     
+## 4 SOLO             699,00 €        Topseller-Hardtail für Gelände und Alltag    
+## 5 PATH             1.849,00 €      leichte Carbon-Hardtail für Highspeed im Gel~
+## 6 HILL             2.599,00 €      vollgefedertes Carbon-Racebike für anspruchs~
+## 7 HILL TRAIL       2.899,00 €      Trail-Variante – Mehr Federweg für das schne~
+## 8 FIRE             2.149,00 €      Drop in die Welt des Freeride Mountainbikings</code></pre>
 </div>
 </div>
 </div>
@@ -778,7 +837,7 @@ patent_assignee_merged_tbl &lt;- merge(x = patent_assignee_tbl, y = assignee_tbl
                                       all.x = TRUE, 
                                       all.y = TRUE)
 toc()</code></pre>
-<pre><code>## 24.5 sec elapsed</code></pre>
+<pre><code>## 26.77 sec elapsed</code></pre>
 <pre class="r"><code>patent_assignee_merged_tbl</code></pre>
 <pre><code>##                       assignee_id patent_id type
 ##       1:                     &lt;NA&gt;   9381169   NA
@@ -840,7 +899,7 @@ patent_assignee_merge_tbl_usa</code></pre>
 <pre class="r"><code>tic()
 most_patents_usa &lt;- patent_assignee_merge_tbl_usa[!is.na(organization), .N, by = organization]
 toc()</code></pre>
-<pre><code>## 1.55 sec elapsed</code></pre>
+<pre><code>## 1.72 sec elapsed</code></pre>
 <pre class="r"><code>setkey(most_patents_usa, &quot;organization&quot;)
 key(most_patents_usa)</code></pre>
 <pre><code>## [1] &quot;organization&quot;</code></pre>
@@ -860,8 +919,8 @@ as_tibble(most_patents_usa, .rows = 10)</code></pre>
 ##  9 Xerox Corporation                            23174
 ## 10 Apple Inc.                                   21821</code></pre>
 </div>
-<div id="company-with-highest-number-of-patents" class="section level2">
-<h2><span class="header-section-number">3.4</span> Company with highest number of patents</h2>
+<div id="company-with-highest-patent-granted-in-2019" class="section level2">
+<h2><span class="header-section-number">3.4</span> Company with highest patent granted in 2019</h2>
 <pre class="r"><code>col_types_patent &lt;- list(
   id = col_character(),
   date = col_date(&quot;%Y-%m-%d&quot;),
@@ -892,7 +951,7 @@ patent_assignee_merge2_tbl &lt;- merge(x = patent_assignee_merged_tbl, y = paten
                                              all.y = TRUE)
 
 toc()</code></pre>
-<pre><code>## 65.75 sec elapsed</code></pre>
+<pre><code>## 122.38 sec elapsed</code></pre>
 <pre class="r"><code>patent_assignee_merge2_tbl </code></pre>
 <pre><code>##          patent_id              assignee_id type
 ##       1:      &lt;NA&gt; per_3mNzDXlijqU11Mla0Wpt   NA
@@ -934,9 +993,6 @@ toc()</code></pre>
 key(patent_assignee_merge2_tbl)</code></pre>
 <pre><code>## [1] &quot;type&quot;</code></pre>
 <pre class="r"><code>setorderv(patent_assignee_merge2_tbl, c(&quot;type&quot;, &quot;organization&quot;))</code></pre>
-</div>
-<div id="company-with-highest-patent-granted-in-2019" class="section level2">
-<h2><span class="header-section-number">3.5</span> Company with highest patent granted in 2019</h2>
 <pre class="r"><code>patent_assignee_merge2_tbl_usa &lt;- patent_assignee_merge2_tbl[ (type == &#39;2&#39;) ]
 
 highest_patent_year &lt;- patent_assignee_merge2_tbl_usa %&gt;%
@@ -968,6 +1024,147 @@ as_tibble(task_2_ans, .rows = 10)</code></pre>
 ##  9 Duke University                                   188 2019-12-03
 ## 10 Genentech, Inc.                                   184 2019-03-12</code></pre>
 </div>
+<div id="innovation-in-tech-top-10-companies-worldwide" class="section level2">
+<h2><span class="header-section-number">3.5</span> Innovation in Tech : Top 10 companies worldwide</h2>
+<pre class="r"><code>col_types_uspc &lt;- list(
+  patent_id = col_character(),
+  mainclass_id = col_character(),
+  sequence = col_integer(),
+  uuid = col_skip(),
+  subclass_id = col_skip()
+  
+)
+
+uspc_tbl &lt;- vroom(
+  file       = &quot;C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/03_patent/uspc.tsv&quot;,
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types_uspc,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+setDT(uspc_tbl)
+uspc_tbl</code></pre>
+<pre><code>##           patent_id mainclass_id sequence
+##        1:   5106549          264        4
+##        2:   5939975          207        4
+##        3:   7358284          424        3
+##        4:   7643522          372        5
+##        5:   5953933           62        1
+##       ---                                
+## 18056782:   D401312          D23        2
+## 18056783:   4900771          524        3
+## 18056784:   7919384          257        2
+## 18056785:   5017484          435        3
+## 18056786:   5447315          273        4</code></pre>
+<pre class="r"><code>tic()
+patent_assignee_merged_uspc_tbl &lt;- merge(x = patent_assignee_merged_tbl, y = uspc_tbl,
+                                           by = &quot;patent_id&quot;,
+                                           all.x = TRUE,  
+                                           all.y = TRUE)
+toc()</code></pre>
+<pre><code>## 115.3 sec elapsed</code></pre>
+<pre class="r"><code>setkey(patent_assignee_merged_uspc_tbl, &quot;type&quot;)
+key(patent_assignee_merged_tbl)</code></pre>
+<pre><code>## [1] &quot;type&quot;</code></pre>
+<pre class="r"><code>?setorder()
+setorderv(patent_assignee_merged_tbl, c(&quot;type&quot;, &quot;organization&quot;))
+
+patent_assignee_merged_tbl_us &lt;- patent_assignee_merged_tbl[ (type == 2)|(type == 3)]
+
+tic()
+most_patents_world &lt;- patent_assignee_merged_tbl_us[!is.na(organization), .N, by = organization]
+toc()</code></pre>
+<pre><code>## 8.05 sec elapsed</code></pre>
+<pre class="r"><code>setkey(most_patents_world, &quot;organization&quot;)
+key(most_patents_world)</code></pre>
+<pre><code>## [1] &quot;organization&quot;</code></pre>
+<pre class="r"><code>setorderv(most_patents_world, c(&quot;N&quot;, &quot;organization&quot;), order = -1)</code></pre>
+<div id="top-10-companies-with-most-patents-worldwide" class="section level3">
+<h3><span class="header-section-number">3.5.1</span> Top 10 companies with most Patents worldwide</h3>
+<pre class="r"><code>as_tibble(most_patents_world, .rows = 10)</code></pre>
+<pre><code>## # A tibble: 10 x 2
+##    organization                                     N
+##    &lt;chr&gt;                                        &lt;int&gt;
+##  1 International Business Machines Corporation 139092
+##  2 Samsung Electronics Co., Ltd.                93562
+##  3 Canon Kabushiki Kaisha                       75910
+##  4 Sony Corporation                             54343
+##  5 Kabushiki Kaisha Toshiba                     49443
+##  6 General Electric Company                     47122
+##  7 Hitachi, Ltd.                                45375
+##  8 Intel Corporation                            42157
+##  9 Fujitsu Limited                              37197
+## 10 Hewlett-Packard Development Company, L.P.    35573</code></pre>
+</div>
+</div>
+<div id="top-5-tech-main-classes" class="section level2">
+<h2><span class="header-section-number">3.6</span> Top 5 Tech Main Classes</h2>
+<pre class="r"><code>setkey(patent_assignee_merged_uspc_tbl, &quot;mainclass_id&quot;)
+key(patent_assignee_merged_uspc_tbl)</code></pre>
+<pre><code>## [1] &quot;mainclass_id&quot;</code></pre>
+<pre class="r"><code>?setorder()
+setorderv(patent_assignee_merged_uspc_tbl, c(&quot;mainclass_id&quot;))
+patent_assignee_merged_uspc_tbl</code></pre>
+<pre><code>##           patent_id              assignee_id type         organization
+##        1:      &lt;NA&gt; per_3mNzDXlijqU11Mla0Wpt   NA                 &lt;NA&gt;
+##        2:      &lt;NA&gt; per_BxKFSQpxRw6OW3Qt4LJJ   NA                 &lt;NA&gt;
+##        3:      &lt;NA&gt; per_FP6Fej8RptR1mTCj1ilv   NA                 &lt;NA&gt;
+##        4:      &lt;NA&gt; per_GxUI3YB6B1dqZnSaVWBX   NA                 &lt;NA&gt;
+##        5:      &lt;NA&gt; per_MXaaRlxceiXDKh7pofqc   NA                 &lt;NA&gt;
+##       ---                                                             
+## 21364535:    PP4136 per_f96SlIwEpnKcjXWdktuN   15                 &lt;NA&gt;
+## 21364536:    PP4136 per_srLDk3ysnP2mN2MDcAXH   15                 &lt;NA&gt;
+## 21364537:   D326120 org_Ht572g0AVh2YPMaAoHVg    2 Dart Industries Inc.
+## 21364538:   D325933                     &lt;NA&gt;   NA                 &lt;NA&gt;
+## 21364539:   D325933                     &lt;NA&gt;   NA                 &lt;NA&gt;
+##           mainclass_id sequence
+##        1:         &lt;NA&gt;       NA
+##        2:         &lt;NA&gt;       NA
+##        3:         &lt;NA&gt;       NA
+##        4:         &lt;NA&gt;       NA
+##        5:         &lt;NA&gt;       NA
+##       ---                      
+## 21364535:          PLT        0
+## 21364536:          PLT        0
+## 21364537:          S11        1
+## 21364538:          S19        2
+## 21364539:          S19        1</code></pre>
+<pre class="r"><code>patent_assignee_merged_uspc_tbl_world &lt;- patent_assignee_merged_uspc_tbl[!(mainclass_id == &#39;na&#39;)]
+patent_assignee_merged_uspc_tbl_world &lt;- patent_assignee_merged_uspc_tbl_world[
+        (organization == &#39;International Business Machines Corporation&#39;)|
+        (organization == &#39;Samsung Electronics Co., Ltd.&#39;)|                                                                         (organization == &#39;Canon Kabushiki Kaisha&#39;)|                                                                                (organization == &#39;Sony Corporation&#39;)|                                                                                      (organization == &#39;Kabushiki Kaisha Toshiba&#39;)|                                                                              (organization == &#39;General Electric Company&#39;)|                                                                              (organization == &#39;Hitachi, Ltd.&#39;)|                                                                                         (organization == &#39;Intel Corporation&#39;)|                                                                                     (organization == &#39;Fujitsu Limited&#39;)|                                                                                       (organization == &#39;Hewlett-Packard Development Company, L.P.&#39;)]          
+
+tic()
+top_patent_class &lt;- patent_assignee_merged_uspc_tbl_world[!is.na(mainclass_id), .N, by = mainclass_id]
+toc()</code></pre>
+<pre><code>## 0.09 sec elapsed</code></pre>
+<pre class="r"><code>top_patent_class</code></pre>
+<pre><code>##      mainclass_id   N
+##   1:          01J   1
+##   2:          01L   5
+##   3:          024   1
+##   4:          03B   1
+##   5:          03C   1
+##  ---                 
+## 726:          D86   1
+## 727:          D87   2
+## 728:           D9 141
+## 729:          D99  39
+## 730:          G9B  18</code></pre>
+<pre class="r"><code>setkey(top_patent_class, &quot;mainclass_id&quot;)
+key(top_patent_class)</code></pre>
+<pre><code>## [1] &quot;mainclass_id&quot;</code></pre>
+<pre class="r"><code>setorderv(top_patent_class, c(&quot;N&quot;, &quot;mainclass_id&quot;), order = -1)
+as_tibble(top_patent_class, .rows = 5)</code></pre>
+<pre><code>## # A tibble: 5 x 2
+##   mainclass_id     N
+##   &lt;chr&gt;        &lt;int&gt;
+## 1 257          90981
+## 2 438          52071
+## 3 365          40283
+## 4 370          36369
+## 5 358          36227</code></pre>
+</div>
 </div>
 <div id="data-visualization" class="section level1">
 <h1><span class="header-section-number">4</span> Data Visualization</h1>
@@ -980,7 +1177,8 @@ as_tibble(task_2_ans, .rows = 10)</code></pre>
 <div id="filter-with-countries-month" class="section level3">
 <h3><span class="header-section-number">4.1.2</span> Filter with countries &amp; month</h3>
 <pre class="r"><code>covid_data_by_month_tbl &lt;- covid_data_tbl %&gt;% map_df(rev) %&gt;%
-  select(cases, countriesAndTerritories, dateRep) %&gt;%
+  #select(cases, countriesAndTerritories, dateRep) %&gt;%
+  select(cases_weekly, countriesAndTerritories, dateRep) %&gt;%
   filter(countriesAndTerritories %in% c(&quot;Germany&quot;,
                                         &quot;United_Kingdom&quot;,
                                         &quot;France&quot;,
@@ -988,7 +1186,7 @@ as_tibble(task_2_ans, .rows = 10)</code></pre>
                                         &quot;India&quot;,
                                         &quot;United_States_of_America&quot;)) %&gt;%
   mutate(date = dmy(dateRep)) %&gt;% group_by( countriesAndTerritories ) %&gt;%
-  mutate(total_cases = cumsum(cases))# %&gt;%</code></pre>
+  mutate(total_cases = cumsum(cases_weekly))# %&gt;%</code></pre>
 </div>
 <div id="plot-the-cumulative-cases-in-year-2020" class="section level3">
 <h3><span class="header-section-number">4.1.3</span> Plot the Cumulative Cases in year 2020</h3>
@@ -999,7 +1197,7 @@ as_tibble(task_2_ans, .rows = 10)</code></pre>
   labs(title = &quot;Confirmed covid cases worldwide&quot;,
        x = &quot;Year 2020&quot;,
        y = &quot;Cases&quot;)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-27-1.png" width="672" /> ### Challenge : Visualize distribution of mortality rate</p>
+<p><img src="journal_files/figure-html/unnamed-chunk-36-1.png" width="672" /> ### Challenge : Visualize distribution of mortality rate</p>
 <pre class="r"><code>world &lt;- map_data(&quot;world&quot;)
 
 covid_by_mortality_tbl &lt;- covid_data_tbl %&gt;%
@@ -1012,9 +1210,11 @@ covid_by_mortality_tbl &lt;- covid_data_tbl %&gt;%
     TRUE ~ countriesAndTerritories
     
   ))%&gt;%
-  group_by(countriesAndTerritories, popData2019, deaths) %&gt;%
+  #group_by(countriesAndTerritories, popData2019, deaths) %&gt;%
+  group_by(countriesAndTerritories, popData2019, deaths_weekly) %&gt;%
   summarise(total_pop = max(popData2019))%&gt;%
-  summarise(total_death = sum(deaths))%&gt;%
+  #summarise(total_death = sum(deaths))%&gt;%
+  summarise(total_death = sum(deaths_weekly))%&gt;%
   summarise(mortality =  (total_death)/(popData2019))
 
 class(covid_by_mortality_tbl)</code></pre>
@@ -1023,10 +1223,10 @@ class(covid_by_mortality_tbl)</code></pre>
 class(covid_by_mortality_tbl)</code></pre>
 <pre><code>## [1] &quot;data.table&quot; &quot;data.frame&quot;</code></pre>
 <pre class="r"><code>covid_by_mortality_tbl %&gt;% glimpse()</code></pre>
-<pre><code>## Rows: 214
+<pre><code>## Rows: 215
 ## Columns: 2
 ## $ countriesAndTerritories &lt;chr&gt; &quot;Afghanistan&quot;, &quot;Albania&quot;, &quot;Algeria&quot;, &quot;Andor...
-## $ mortality               &lt;dbl&gt; 1.955746e-05, 6.637724e-05, 9.476680e-06, 2...</code></pre>
+## $ mortality               &lt;dbl&gt; 5.449275e-05, 4.104908e-04, 5.235401e-05, 8...</code></pre>
 <pre class="r"><code>setDT(world)
 world %&gt;% glimpse()</code></pre>
 <pre><code>## Rows: 99,338
@@ -1044,7 +1244,7 @@ covid_by_map_tbl &lt;- merge(x = world, y = covid_by_mortality_tbl,
                           all.y = FALSE)
 
 toc()</code></pre>
-<pre><code>## 0.05 sec elapsed</code></pre>
+<pre><code>## 0.03 sec elapsed</code></pre>
 <pre class="r"><code>covid_by_map_tbl%&gt;% glimpse()</code></pre>
 <pre><code>## Rows: 99,338
 ## Columns: 7
@@ -1054,7 +1254,7 @@ toc()</code></pre>
 ## $ group     &lt;dbl&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, ...
 ## $ order     &lt;int&gt; 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 2...
 ## $ subregion &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-## $ mortality &lt;dbl&gt; 1.955746e-05, 1.955746e-05, 1.955746e-05, 1.955746e-05, 1...</code></pre>
+## $ mortality &lt;dbl&gt; 5.449275e-05, 5.449275e-05, 5.449275e-05, 5.449275e-05, 5...</code></pre>
 <pre class="r"><code>setkey(covid_by_map_tbl, &quot;region&quot;)
 key(covid_by_map_tbl)</code></pre>
 <pre><code>## [1] &quot;region&quot;</code></pre>
@@ -1066,7 +1266,7 @@ covid_by_map_tbl%&gt;%
   scale_fill_continuous(labels = scales::percent, low = &quot;white&quot;, high=&quot;red&quot;)+
   labs(title = &quot;Confirmed Covid19 deaths relative to size of the population &quot;,
        subtitle = &quot;More than 1.83 Million confirmed covid19 deaths worldwide&quot;)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p><img src="journal_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
 </div>
 </div>
 </div>

@@ -21,6 +21,7 @@ knitr::opts_chunk$set(message=FALSE,warning=FALSE, cache=TRUE)
 library(tidyverse)
 library(readxl)
 library(writexl)
+
 ```
 ## Importing Files 
 ```{r}
@@ -77,6 +78,7 @@ sales_by_loc_tbl %>%
   geom_col(fill = "#2DC6D6") + # Use geom_col for a bar plot
   geom_label(aes(label = Total_sales_in_Euro)) + # Adding labels to the bars
   geom_smooth(method = "lm", se = FALSE) + # Adding a trendline
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   
   scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
                                                     decimal.mark = ",", 
@@ -100,6 +102,58 @@ sales_by_loc_tbl %>%
 sales_by_loc_tbl %>% 
   write_rds("C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/01_bike_sales/02_wrangled_data/sales_by_loc_tbl.rds")
 ```
+## 1.2 Analyzing the sales by location and year (facet_wrap)
+### Importing additional library
+```{r, include = FALSE}
+library(lubridate)
+```
+### Combine Data
+```{r}
+bike_summary_tbl <- orderlines_tbl %>%
+  left_join(bikes_tbl, by = c("product.id" = "bike.id")) %>%
+  left_join(bikeshops_tbl, by = c("customer.id" = "bikeshop.id"))
+```
+### Split Location (City & State) and Calcuate Total Price 
+```{r}
+bike_summary_wrangled_tbl <- bike_summary_tbl %>%
+separate(col = location,
+         into = c("city", "state"),
+         sep = ", ",
+         convert = T) %>% 
+mutate(total.price = price * quantity)
+```
+### Simplify the Table 
+```{r}
+bike_summary_wrangled_tbl <- bike_summary_wrangled_tbl %>%
+  select(...1, order.id, order.date, customer.id, quantity, price, state, total.price)
+```
+### Sales by state per Year
+```{r}
+sales_by_year_state_tbl <- bike_summary_wrangled_tbl %>%
+  select(order.date, total.price, state) %>%
+  mutate(year = year(order.date)) %>%
+  group_by(year, state) %>%
+  summarise(sales = sum(total.price)) %>%
+  ungroup() %>%
+  mutate(sales_text = scales::dollar(sales, big.mark = ".",
+                                     decimal.mark = ",",
+                                     prefix = "",
+                                     suffix = " €"))
+sales_by_year_state_tbl
+```
+### Plotting the data
+```{r}
+sales_by_year_state_tbl %>%
+  ggplot(aes(x = year, y = sales, fill = state)) +
+  geom_col() + 
+  facet_wrap(~ state) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(labels = scales::dollar_format(big.mark = ".",
+                                                    decimal.mark = ",",
+                                                    prefix = "",
+                                                    suffix = " €")) 
+```
 # Data Acquisition
 ## API
 ### Importing Libraries
@@ -120,7 +174,7 @@ fun_trivia %>%
   fromJSON() %>%
   as_tibble()
 ```
-
+# Data Acquisition
 ## Scraping data from competitor Website
 ### Importing Libraries
 ```{r, include=FALSE}
@@ -239,7 +293,7 @@ key(most_patents_usa)
 setorderv(most_patents_usa, c("N", "organization"), order = -1)
 as_tibble(most_patents_usa, .rows = 10)
 ```
-## Company with highest number of patents 
+## Company with highest patent granted in 2019
 ```{r}
 col_types_patent <- list(
   id = col_character(),
@@ -280,7 +334,6 @@ key(patent_assignee_merge2_tbl)
 
 setorderv(patent_assignee_merge2_tbl, c("type", "organization"))
 ```
-## Company with highest patent granted in 2019
 ```{r}
 patent_assignee_merge2_tbl_usa <- patent_assignee_merge2_tbl[ (type == '2') ]
 
@@ -299,6 +352,81 @@ task_2_ans <- highest_patent_year_2019 %>%
   select(organization, num_claims, date)
 
 as_tibble(task_2_ans, .rows = 10)
+```
+
+## Innovation in Tech : Top 10 companies worldwide 
+```{r}
+
+col_types_uspc <- list(
+  patent_id = col_character(),
+  mainclass_id = col_character(),
+  sequence = col_integer(),
+  uuid = col_skip(),
+  subclass_id = col_skip()
+  
+)
+
+uspc_tbl <- vroom(
+  file       = "C:/Users/Aashik Udupi/Desktop/R_Projects/00_data/03_patent/uspc.tsv",
+  delim      = "\t", 
+  col_types  = col_types_uspc,
+  na         = c("", "NA", "NULL")
+)
+
+setDT(uspc_tbl)
+uspc_tbl
+
+tic()
+patent_assignee_merged_uspc_tbl <- merge(x = patent_assignee_merged_tbl, y = uspc_tbl,
+                                           by = "patent_id",
+                                           all.x = TRUE,  
+                                           all.y = TRUE)
+toc()
+
+setkey(patent_assignee_merged_uspc_tbl, "type")
+key(patent_assignee_merged_tbl)
+?setorder()
+setorderv(patent_assignee_merged_tbl, c("type", "organization"))
+
+patent_assignee_merged_tbl_us <- patent_assignee_merged_tbl[ (type == 2)|(type == 3)]
+
+tic()
+most_patents_world <- patent_assignee_merged_tbl_us[!is.na(organization), .N, by = organization]
+toc()
+
+setkey(most_patents_world, "organization")
+key(most_patents_world)
+setorderv(most_patents_world, c("N", "organization"), order = -1)
+```
+### Top 10 companies with most Patents worldwide 
+```{r}
+as_tibble(most_patents_world, .rows = 10)
+```
+## Top 5 Tech Main Classes  
+```{r}
+setkey(patent_assignee_merged_uspc_tbl, "mainclass_id")
+key(patent_assignee_merged_uspc_tbl)
+
+?setorder()
+setorderv(patent_assignee_merged_uspc_tbl, c("mainclass_id"))
+patent_assignee_merged_uspc_tbl
+
+patent_assignee_merged_uspc_tbl_world <- patent_assignee_merged_uspc_tbl[!(mainclass_id == 'na')]
+patent_assignee_merged_uspc_tbl_world <- patent_assignee_merged_uspc_tbl_world[
+        (organization == 'International Business Machines Corporation')|
+        (organization == 'Samsung Electronics Co., Ltd.')|                                                                         (organization == 'Canon Kabushiki Kaisha')|                                                                                (organization == 'Sony Corporation')|                                                                                      (organization == 'Kabushiki Kaisha Toshiba')|                                                                              (organization == 'General Electric Company')|                                                                              (organization == 'Hitachi, Ltd.')|                                                                                         (organization == 'Intel Corporation')|                                                                                     (organization == 'Fujitsu Limited')|                                                                                       (organization == 'Hewlett-Packard Development Company, L.P.')]          
+
+tic()
+top_patent_class <- patent_assignee_merged_uspc_tbl_world[!is.na(mainclass_id), .N, by = mainclass_id]
+toc()
+
+top_patent_class
+
+setkey(top_patent_class, "mainclass_id")
+key(top_patent_class)
+setorderv(top_patent_class, c("N", "mainclass_id"), order = -1)
+as_tibble(top_patent_class, .rows = 5)
+
 ```
 # Data Visualization
 ```{r, include=FALSE}
@@ -319,7 +447,8 @@ covid_data_tbl <- read_csv("https://opendata.ecdc.europa.eu/covid19/casedistribu
 ### Filter with countries & month
 ```{r}
 covid_data_by_month_tbl <- covid_data_tbl %>% map_df(rev) %>%
-  select(cases, countriesAndTerritories, dateRep) %>%
+  #select(cases, countriesAndTerritories, dateRep) %>%
+  select(cases_weekly, countriesAndTerritories, dateRep) %>%
   filter(countriesAndTerritories %in% c("Germany",
                                         "United_Kingdom",
                                         "France",
@@ -327,7 +456,7 @@ covid_data_by_month_tbl <- covid_data_tbl %>% map_df(rev) %>%
                                         "India",
                                         "United_States_of_America")) %>%
   mutate(date = dmy(dateRep)) %>% group_by( countriesAndTerritories ) %>%
-  mutate(total_cases = cumsum(cases))# %>%
+  mutate(total_cases = cumsum(cases_weekly))# %>%
 ```
 ### Plot the Cumulative Cases in year 2020 
 ```{r}
@@ -353,9 +482,11 @@ covid_by_mortality_tbl <- covid_data_tbl %>%
     TRUE ~ countriesAndTerritories
     
   ))%>%
-  group_by(countriesAndTerritories, popData2019, deaths) %>%
+  #group_by(countriesAndTerritories, popData2019, deaths) %>%
+  group_by(countriesAndTerritories, popData2019, deaths_weekly) %>%
   summarise(total_pop = max(popData2019))%>%
-  summarise(total_death = sum(deaths))%>%
+  #summarise(total_death = sum(deaths))%>%
+  summarise(total_death = sum(deaths_weekly))%>%
   summarise(mortality =  (total_death)/(popData2019))
 
 class(covid_by_mortality_tbl)
